@@ -1,0 +1,2337 @@
+---
+title: "Great Lakes Plastics 2014 Data"
+author: "Rachel N. Cable & Melissa B. Duhaime"
+date: "April 25, 2017"
+output:  
+  html_document:
+    code_folding: hide
+    highlight: haddock
+    keep_md: yes
+    number_sections: yes
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+      toc_depth: 3
+---
+
+<!--BEGIN:  Set the global options and load packages-->
+
+```{r create_output_directory, echo = FALSE}
+output_dir <- "./outfiles_final/"
+dir.create(path = output_dir, showWarnings = TRUE)
+```
+
+
+```{r set-global-options, echo = FALSE}
+require(knitr)
+knitr::opts_chunk$set(eval = TRUE, 
+                      echo = TRUE, 
+                      cache = FALSE,
+                      include = TRUE,
+                      collapse = FALSE,
+                      dependson = NULL,
+                      engine = "R", # Chunks will always have R code, unless noted
+                      error = TRUE,
+                      dev = "pdf",
+                      fig.path="outfiles_final/final_",  # Set the figure options
+                      fig.align = "center"
+                      #, 
+                      # fig.width = 6,
+                      # fig.height = 6
+                      )
+```
+
+```{r silent-packages, echo = FALSE, eval = TRUE, message=FALSE, include = FALSE}
+require(plyr)
+require(dplyr)
+require(ggplot2)
+require(DT)
+require(plotly)
+require(readr)
+require(splines)
+require(tidyr)
+require(reshape2)
+require(corrgram)
+require(sciplot)
+require(stats)
+require(tables)
+require(vegan)
+require(car)
+require(xtable)
+  options(xtable.floating = FALSE)
+  options(xtable.timestamp = "")
+require(ggtern)
+require(timeDate)
+require(MASS)
+require(Hmisc)
+```
+
+<!--END:  Set the global options and load packages-->
+
+
+# Maps and other figures generated outside of R 
+
+## Stations sampled in 2014
+```{r station.map, out.height = "200px"}
+include_graphics("Duhaime_Fig1_stations.tiff", auto_pdf = TRUE)
+```
+
+## Sample processing
+```{r station.processing, out.height = "200px"}
+include_graphics("Duhaime_Fig2_sample_images.tif", auto_pdf = TRUE)
+```
+
+## Sample concentrations
+```{r sample.concentration.map, out.height = "200px"}
+include_graphics("Duhaime_Fig3_count_maps_total.tif", auto_pdf = TRUE)
+```
+
+## SEM-EDS example images
+```{r sem.images, out.height = "200px"}
+include_graphics("246530_Duhaime_Figure_7.TIF", auto_pdf = TRUE)
+```
+
+## Transport model outputs
+```{r model.by.month, out.height = "200px"}
+include_graphics("Duhaime_Fig9_model_months.tif", auto_pdf = TRUE)
+```
+
+```{r model.res.time, out.height = "200px"}
+include_graphics("Duhaime_Fig10_residence_time_model.tif", auto_pdf = TRUE)
+```
+
+```{r model.aggregation, out.height = "200px"}
+include_graphics("Duhaime_SI_Fig4.tif", auto_pdf = TRUE)
+```
+
+
+# Plastic concentrations
+
+## Importing and Managing Count Data and Trawl Metadata
+```{r import_gl_2014_plastic_concentrations}
+
+## Read in csv
+## total_conc_km2 column is summation of counts from all non-fiber plastic types: does not include fibers
+
+gl.2014.plastics.conc.df <- 
+  read.csv(file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_plastic_concentrations.csv")
+
+# Set factor levels for size fractions
+
+gl.2014.plastics.conc.df$size_fraction_um <-
+  factor(gl.2014.plastics.conc.df$size_fraction_um, levels = c('106-1000', '1000-4750', '>4750'))
+
+```
+
+We currently have data for `r length(unique(gl.2014.plastics.conc.df$station))` stations and `r length(unique(gl.2014.plastics.conc.df$trawl))` trawls.
+
+```{r table_gl_2014_plastic_concentrations}
+
+## Display data table of concentrations
+
+datatable(gl.2014.plastics.conc.df, 
+          options = list(pageLength = 10),
+          caption = "Total concentrations, long format"
+          )
+```
+
+Note that the NK 0009-2 106-1000um fragment concentration is an order of magnitude larger than all others; this is an unreliable count on an anomalously difficult sample, so we remove this concentration from the data set.
+
+```{r data_removal_gl_2014_conc}
+
+## Remove unreliable data
+
+remove_row_num <- which(gl.2014.plastics.conc.df$'trawl' == "NK 0009-2" & gl.2014.plastics.conc.df$'size_fraction_um' == "106-1000")
+
+gl.2014.plastics.conc.df[remove_row_num, 4:13] <- NA
+
+```
+
+```{r create_long_table_for_summary_tables_by_conc_type}
+
+table.gl.2014.conc.by.size.comp.melt <- 
+  melt(gl.2014.plastics.conc.df, 
+       measure.vars = c('fragment_conc_km2', 
+                        'film_conc_km2', 
+                        'line_conc_km2', 
+                        'nurdle_conc_km2', 
+                        'sphere_conc_km2', 
+                        'foam_conc_km2', 
+                        'paint_conc_km2',
+                        'total_conc_km2', 
+                        'fiber_conc_km2'), 
+       id.vars = c('station', 'trawl', 'size_fraction_um'), 
+       value.name = "concentration", 
+       variable.name = "conc_type", 
+       na.rm = FALSE)
+
+```
+
+### Trawl metadata
+
+```{r table_gl_2014_metadata}
+
+gl.2014.weather.data <- read.csv("~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_trawl_metadata.csv")
+
+## Rearrange factor levels for station type and water body
+
+gl.2014.weather.data$water_body <- factor(gl.2014.weather.data$water_body, levels = c("Lake Superior", "Lake Huron", "Lake St. Clair", "Detroit Rv.", "Lake Erie", "Niagara Rv."))
+
+gl.2014.weather.data$station_class <- factor(gl.2014.weather.data$station_class, levels = c("Basin", "Non urban", "Urban", "River plume", "WWTP"))
+
+datatable(gl.2014.weather.data, options = list(
+  pageLength = 10,
+  autoWidth = TRUE),
+  caption = "Station metadata"
+)
+
+```
+
+```{r merge_gl_2014_concentrations_metadata}
+## Merge trawl datasets for correlations and plotting
+
+gl.2014.all.data <- 
+  merge(gl.2014.plastics.conc.df, gl.2014.weather.data, 
+        by = c("trawl","station"), 
+        all.x = TRUE, 
+        suffixes = c(".x", ".y"))
+
+```
+
+```{r create_gl_2014_conc_w_nonnumeric_metadata}
+
+## Create dataframe of only nonnumeric trawl metadata
+
+gl.2014.trawl.data.nonnumeric<- 
+  gl.2014.weather.data[
+    sapply(
+      gl.2014.weather.data, 
+      function(x) !is.numeric(x))]
+
+# Merge with per-trawl concentration data
+
+gl.2014.all.data.nonnumeric <- merge(gl.2014.plastics.conc.df, 
+                                     gl.2014.trawl.data.nonnumeric, 
+                                     by = c("trawl","station"), 
+                                     all.x = TRUE, 
+                                     suffixes = c(".x", ".y"))
+
+datatable(gl.2014.all.data.nonnumeric, 
+          options = list(pageLength = 10),
+          caption = "Trawl concentrations and non-numeric metadata"
+          )
+
+```
+
+```{r create_gl_2014_conc_w_nonnumeric_metadata_long_format}
+
+# Transform trawl data into long format by concentrations for plotting and stats
+
+gl.all.trawl.data.nonnumeric.long <-
+  melt(gl.2014.all.data.nonnumeric, 
+       measure.vars = c('fragment_conc_km2', 
+                        'film_conc_km2', 
+                        'line_conc_km2', 
+                        'nurdle_conc_km2', 
+                        'sphere_conc_km2', 
+                        'foam_conc_km2', 
+                        'paint_conc_km2', 
+                        'total_conc_km2', 
+                        'fiber_conc_km2'), 
+       id.vars = c('trawl', 
+                   'station', 
+                   'size_fraction_um', 
+                   'trawl_date', 
+                   'trawl_start_time', 
+                   'water_body',
+                   'location', 
+                   'station_class'), 
+       value.name = "concentration",
+       variable.name = "conc_type", 
+       na.rm = FALSE)
+
+gl.all.trawl.data.nonnumeric.long$conc_type <- 
+  factor(gl.all.trawl.data.nonnumeric.long$conc_type, 
+         levels = c("fragment_conc_km2",
+                    "line_conc_km2",
+                    "film_conc_km2",
+                    "foam_conc_km2",
+                    "nurdle_conc_km2",
+                    "sphere_conc_km2",
+                    "paint_conc_km2",
+                    "total_conc_km2",
+                    "fiber_conc_km2"))
+```
+
+```{r create_gl_2014_separate_dataframes_total_and_component_conc}
+
+#fix instances of gl.all.trawl.data.nonnumeric.long.tot
+gl.all.trawl.data.nonnumeric.long.tot <- 
+  subset(
+    gl.all.trawl.data.nonnumeric.long, 
+    conc_type == 'total_conc_km2')
+
+gl.all.trawl.data.nonnumeric.long.tot.noNA <-
+  subset(gl.all.trawl.data.nonnumeric.long.tot,
+         !is.na(concentration))
+
+#View(gl.all.trawl.data.nonnumeric.long.tot)
+
+gl.all.trawl.data.nonnumeric.long.comp <- 
+  subset(
+    gl.all.trawl.data.nonnumeric.long, 
+    conc_type != 'total_conc_km2' & conc_type != 'fiber_conc_km2')
+#View(gl.all.trawl.data.nonnumeric.long.comp)
+
+gl.all.trawl.data.nonnumeric.long.comp.wfiber <- 
+  subset(
+    gl.all.trawl.data.nonnumeric.long, 
+    conc_type != 'total_conc_km2')
+
+gl.all.trawl.data.nonnumeric.long.comp.wfiber.noNA <- 
+  subset(gl.all.trawl.data.nonnumeric.long.comp.wfiber,
+         !is.na(concentration))
+
+dim(gl.all.trawl.data.nonnumeric.long.comp)
+gl.all.trawl.data.nonnumeric.long.comp.noNA <-
+  subset(gl.all.trawl.data.nonnumeric.long.comp, 
+         !is.na(concentration))
+dim(gl.all.trawl.data.nonnumeric.long.comp.noNA)
+#View(gl.all.trawl.data.nonnumeric.long.comp.noNA)
+
+```
+
+#### Trawl totals across all size fractions
+
+```{r table_total_conc_all_size_fractions}
+
+gl.2014.plastics.tot.conc <- 
+  as.data.frame(gl.2014.plastics.conc.df[,c('trawl', 
+                              'station', 
+                              'size_fraction_um', 
+                              'total_conc_km2')])
+
+gl.2014.plastics.tot.conc.nona <- 
+  na.omit(gl.2014.plastics.tot.conc)
+
+gl.2014.plastics.tot.wide <-
+  dcast(data = gl.2014.plastics.tot.conc.nona,
+        formula = trawl + station ~ size_fraction_um,
+        value.var = 'total_conc_km2',
+        fill = NA_real_)
+
+gl.2014.plastics.tot.wide.complete.only <-
+  as.data.frame(na.omit(gl.2014.plastics.tot.wide))
+
+gl.2014.plastics.tot.wide.complete.only$total_concentration <- 
+  gl.2014.plastics.tot.wide.complete.only$'106-1000' + 
+  gl.2014.plastics.tot.wide.complete.only$'1000-4750' +
+  gl.2014.plastics.tot.wide.complete.only$'>4750'
+
+gl.2014.plastics.tot.wide.all.data <-
+  merge(gl.2014.plastics.tot.wide.complete.only, 
+        gl.2014.weather.data, 
+        by = c("trawl","station"), 
+        all.x = TRUE, 
+        suffixes = c(".x", ".y"))
+
+gl.2014.plastics.tot.wide.all.data <-
+gl.2014.plastics.tot.wide.all.data[,c("trawl", 
+  "station",
+  "water_body",
+  "location",
+  "station_class",
+  "106-1000",
+  "1000-4750",
+  ">4750",
+  "total_concentration",
+  "trawl_date",
+  "trawl_start_time",
+  "flowm_dist_m",
+  "flowm_area_km2",
+  "wet_mass",
+  "dry_mass",
+  "air_vel_avg_kt",
+  "cloud_cover_avg",
+  "air_temp_avg_C",
+  "water_temp_avg_C",
+  "E_wtr_vel_surf_avg_kt",
+  "N_wtr_vel_surf_avg_kt",
+  "wv_drctn_avg",
+  "wv_prd_avg",
+  "sig_wv_ht_avg_m")]
+
+datatable(gl.2014.plastics.tot.wide.all.data,
+          options = list(pageLength = 25),
+          caption = "Total of all fractions for complete trawls (km-2)")
+
+write.csv(gl.2014.plastics.tot.wide.all.data, 
+          file = "./outfiles_final/final_data_sheet_1_total_concentration_all_sizes_all_data.csv", 
+          na = "NA",
+          row.names = FALSE)
+```
+
+
+### Station metadata
+
+```{r create_gl_2014_mean_conc_w_nonnnumeric_metatdata_wide}
+
+# Create a wide dataframe of trawl mean concentrations by size class, maintaining nonnumeric metadata and concentration components
+
+gl.all.trawl.data.nonnumeric.long.nona <- 
+  na.omit(gl.all.trawl.data.nonnumeric.long)
+
+gl.all.data.nonnnumeric.mean.stn.wide <- 
+  dcast(
+    data=gl.all.trawl.data.nonnumeric.long.nona,
+    station_class+water_body+location+trawl_date +station+size_fraction_um ~ conc_type,
+    mean,
+    value.var = 'concentration'
+    )
+
+```
+
+```{r create_gl_2014_mean_conc_w_nonnnumeric_metatdata_long}
+
+# Create a long dataframe of trawl mean concentrations by size class for plotting and stats, maintaining nonnumeric metadata and concentration components
+
+gl.all.data.nonnumeric.mean.stn.long <- 
+  melt(
+    gl.all.data.nonnnumeric.mean.stn.wide,
+    measure.vars = c('fragment_conc_km2',
+                     'film_conc_km2', 
+                     'line_conc_km2', 
+                     'nurdle_conc_km2', 
+                     'sphere_conc_km2', 
+                     'foam_conc_km2', 
+                     'paint_conc_km2', 
+                     'total_conc_km2', 
+                     'fiber_conc_km2'), 
+    id.vars = c('station', 
+                'size_fraction_um', 
+                'trawl_date', 
+                'water_body', 
+                'location', 
+                'station_class'), 
+   value.name = "mean_concentration", 
+   variable.name = "conc_type"
+   )
+
+datatable(gl.all.data.nonnumeric.mean.stn.long, 
+          options = list(pageLength = 10),
+          caption = "Mean concentrations and nonnumeric metadata, long format"
+          )
+
+```
+
+##Exploring Data
+
+### Count Data Shape
+A simple histogram of all total concentrations by size fraction was created to establish an appreciation for shape of the data.
+
+```{r plot_gl_2014_histogram_of_total_conc_by_size_noNA }
+
+table.gl.2014.conc.by.size.comp.melt.nona <- 
+  na.omit(table.gl.2014.conc.by.size.comp.melt)
+
+table.gl.2014.conc.by.size.comp.melt.nona.tot <- 
+   subset(
+      table.gl.2014.conc.by.size.comp.melt.nona, 
+      conc_type == 'total_conc_km2')
+
+ggplot(
+  table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+  aes(x = concentration)) +
+  geom_histogram(bins = 500) +
+  facet_grid(size_fraction_um ~ ., 
+             scales = "free")
+
+```
+
+Repeat the same for the component concentrations.
+
+```{r plot_gl_2014_histogram_of_component_conc_by_size }
+
+table.gl.2014.conc.by.size.comp.melt.nona.comp <- 
+   subset(
+      table.gl.2014.conc.by.size.comp.melt.nona, 
+      conc_type != 'total_conc_km2')
+
+```
+
+The 106-1000 µm fraction is pretty evenly distributed (likely because data are more sparse--due to labor intensiveness, not all trawls were counted) and  the concentrations for the larger two fractions are heavily postitively skewed (toward the zeroes and smaller numbers). We can also see this in the skewness (very positive) and kurtosis (high positive numbers) for the total concentrations.
+
+```{r table_gl_2014_trawl_tot_conc_skew_kurt_by_size}
+
+trawl.tot.conc.skew.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('size_fraction_um'),
+    function(x) round(skewness(x$'concentration'), 2))
+
+trawl.tot.conc.kurtosis.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('size_fraction_um'), 
+    function(x) round(kurtosis(x$'concentration'), 2))
+
+trawl.tot.conc.skew.kurt.by.size <- 
+  cbind(
+    trawl.tot.conc.skew.by.size,
+    Kurt. = trawl.tot.conc.kurtosis.by.size$V1
+    )
+colnames(trawl.tot.conc.skew.kurt.by.size) <-
+  c('size_fraction_um', 'Skew.', 'Kurt.')
+
+datatable(
+  trawl.tot.conc.skew.kurt.by.size,
+  options = list(pageLength = 3),
+  caption = "Skewdness and kurtosis of trawl total plastic concentrations (km^-2)")
+  
+```
+
+### Testing Normality
+Based on visual inspection, these data do not appear to have a normal distribution. We next test this hypothesis of non-normality with the Shapiro-Wilks test: are the concentrations non-normally distributed? (smaller p-value, higher probability of being non-normal)
+
+```{r shapiro_wilks_test_gl_2014_trawls}
+
+shap.test.trawl.conc.type.W <- aggregate(concentration ~ conc_type, data = gl.all.trawl.data.nonnumeric.long, FUN = function(x) shapiro.test(x)$statistic)
+
+shap.test.trawl.conc.type.pval <- aggregate(concentration ~ conc_type, data = gl.all.trawl.data.nonnumeric.long, FUN = function(x) shapiro.test(x)$p.value)
+
+shap.test.trawl.conc.type.pval
+
+shap.test.trawl.size.frac.W <- aggregate(concentration ~ size_fraction_um, data = gl.all.trawl.data.nonnumeric.long, FUN = function(x) shapiro.test(x)$statistic)
+
+shap.test.trawl.size.frac.pval <- aggregate(concentration ~ size_fraction_um, data = gl.all.trawl.data.nonnumeric.long, FUN = function(x) shapiro.test(x)$p.value)
+
+shap.test.trawl.size.frac.pval
+
+```
+
+```{r shapiro_wilks_test_gl_2014_stations}
+
+shap.test.stn.conc.type.W <- 
+  aggregate(mean_concentration ~ conc_type,
+            data = gl.all.data.nonnumeric.mean.stn.long,
+            FUN = function(x) shapiro.test(x)$statistic)
+
+shap.test.stn.conc.type.pval <- aggregate(mean_concentration ~ conc_type, 
+                                          data = 
+                                        gl.all.data.nonnumeric.mean.stn.long,
+                                          FUN = function(x) 
+                                            shapiro.test(x)$p.value)
+
+shap.test.stn.conc.type.pval
+
+shap.test.stn.size.frac.W <- aggregate(mean_concentration ~ size_fraction_um, 
+                                       data = 
+                                        gl.all.data.nonnumeric.mean.stn.long,
+                                       FUN = function(x) 
+                                         shapiro.test(x)$statistic)
+
+shap.test.stn.size.frac.pval <- aggregate(mean_concentration ~ size_fraction_um, 
+                                          data = 
+                                        gl.all.data.nonnumeric.mean.stn.long, 
+                                          FUN = function(x) 
+                                            shapiro.test(x)$p.value)
+
+shap.test.stn.size.frac.pval
+```
+
+According to the Shapiro Wilks test on all component trawl concentrations and total concentrations, the distributions vary significantly from normal (p<<<0.5). The same result is observed  with station concentrations, although the p-values are higher for station means.
+
+Conclusion: None of these datasets are normally distributed, so parametric tests are not an option without data transformations.
+
+### Centrality by Mean or Median?
+Based on the data shape, we next ask: what best describes the centrality of these data: mean or median of concentrations?
+
+Mean (red dashed line) and median (blue dotted line) for the total concentration histograms were plotted.
+
+```{r plot_gl_2014_histogram_of_total_conc_w_mean_median, fig.height=6, fig.width=8}
+
+table.gl.2014.conc.by.size.comp.melt.nona.tot.means <-
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    "size_fraction_um", 
+    summarise, 
+    size.fraction.mean = mean(concentration))
+
+table.gl.2014.conc.by.size.comp.melt.nona.tot.medians <-
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    "size_fraction_um", 
+    summarise, 
+    size.fraction.median = median(concentration))
+
+ggplot(
+  table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+  aes(x = concentration)) +
+  geom_histogram(bins = 500) + 
+  facet_grid(size_fraction_um ~ ., 
+             scales = "free") + 
+  scale_x_continuous(limits = c(0, 1500000))+
+  geom_vline(data = table.gl.2014.conc.by.size.comp.melt.nona.tot.means,
+             aes(xintercept= size.fraction.mean),
+             linetype = "dashed",
+             size = 0.5, 
+             color = "red") + 
+    geom_vline(data = table.gl.2014.conc.by.size.comp.melt.nona.tot.medians,
+             aes(xintercept= size.fraction.median),
+             linetype = "dotted",
+             size = 0.5, 
+             color = "blue") +
+    annotate("text", label = "blue = median   red = mean", size = 3, x = 1500000, y = 3)
+
+```
+
+Mean appears to represent the data  better than the median, because although it doesn't fall where the majority of the data are, it falls more central to the full range of data.  
+
+Representing the spread of the data, however, is going to be more difficult because the data are:  
+* so postitively skewed that the standard deviation will be very large  
+* limited by zero on the lower end but not limited on the upper end
+
+A quick summary of the total concentrations also exemplifies this issue, and how it varies across size fractions. The mean concentration for each fraction is suprisingly close to (and for the smallest fraction, greater than) the upper quartile (75th percentile) value. This means ~75% of the concentrations in each size fraction are below the mean value.
+
+```{r summary_gl_2014_total_conc_by_size_fraction}
+
+trawl.tot.conc.summary.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('size_fraction_um'), 
+    function(x) summary(x$'concentration'))
+
+trawl.tot.conc.sd.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('size_fraction_um'), 
+    function(x) sd(x$'concentration'))
+
+trawl.tot.conc.iqr.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('size_fraction_um'), 
+    function(x) IQR(x$'concentration'))
+
+trawl.tot.conc.summary.by.size$StDev. <- 
+  round(trawl.tot.conc.sd.by.size$V1, 0)
+
+trawl.tot.conc.summary.by.size$IQR <- 
+  round(trawl.tot.conc.iqr.by.size$V1, 0)
+
+datatable(
+  trawl.tot.conc.summary.by.size,
+  options = list(pageLength = 3),
+  caption = "Summary of trawl total plastic concentrations (km^-2)")
+  
+```
+
+
+The Q-Q plot below shows that the concentrations in the 1000-4750 um size class deviate from linearity and are thus non-normally distributed--with skew particularly evident at higher concentrations.
+
+```{r qqplot_gl_2014_trawl_midsize_total_conc_exp_transformation}
+
+params.km <- as.list(fitdistr(subset(
+      table.gl.2014.conc.by.size.comp.melt.nona.tot$concentration, 
+      table.gl.2014.conc.by.size.comp.melt.nona.tot$size_fraction_um == '1000-4750'), "exponential")$estimate)
+
+ggplot(
+  data = subset(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    size_fraction_um == '1000-4750'), 
+  geom = 'blank') +
+  stat_qq(aes(sample = concentration), 
+          distribution = qexp, 
+          dparams = params.km) + 
+  geom_abline(slope = 1, 
+              intercept = 0)
+```
+
+The above spread can also be represented as a boxplot (red point is mean value). Note that the means are higher than the median (central line of boxplot), and for the mid and large size class are greater than the 75% percentile (top of box).
+```{r plot_box_gl_2014_total_conc_w_mean}
+
+ggplot(table.gl.2014.conc.by.size.comp.melt.nona.tot, aes(x = size_fraction_um, y = concentration)) +
+  geom_boxplot(aes(y = (concentration+.01), x = factor(size_fraction_um))) + 
+  stat_summary(fun.y="mean", geom="point",colour = "red", size = 2)+
+ # scale_y_log10() + 
+  theme(axis.text.x = element_text(size = 10, angle = 45, hjust = 1))
+
+```
+
+## Data by trawl (each trawl treated individually)
+### Summary tables by size fraction
+
+```{r table_gl_2014_trawl_conc_proportion_by_size_conc_type, results = "asis"}
+
+table.gl.2014.conc.by.size.comp.melt.nona <- 
+  na.omit(table.gl.2014.conc.by.size.comp.melt)
+
+trawl.prop.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.conc.by.size.comp.melt.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.conc.by.size.comp.sum <-
+  aggregate(data=table.gl.2014.conc.by.size.comp.melt.nona,
+            concentration~size_fraction_um+conc_type,
+            sum)
+ 
+table.gl.2014.conc.by.size.comp.sum.cast <-
+  dcast(data = table.gl.2014.conc.by.size.comp.sum,
+        formula = size_fraction_um ~ conc_type,
+        fill = NA,
+        value.var = "concentration")
+
+table.gl.2014.conc.totals.by.size.comp.prop <-
+  cbind(table.gl.2014.conc.by.size.comp.sum.cast$'size_fraction_um', 
+        table.gl.2014.conc.by.size.comp.sum.cast[,2:8]/table.gl.2014.conc.by.size.comp.sum.cast$'total_conc_km2')
+
+conc.type.col.names <- c("Size (µm)", 
+                         "Fragment", 
+                         "Film", 
+                         "Line", 
+                         "Nurdle", 
+                         "Sphere", 
+                         "Foam", 
+                         "Paint")
+
+colnames(table.gl.2014.conc.totals.by.size.comp.prop) <- conc.type.col.names
+
+table.gl.2014.conc.totals.by.size.comp.prop$n <- 
+  trawl.prop.conc.size.count$total_conc_km2
+
+# kable(
+#   table.gl.2014.conc.totals.by.size.comp.prop, 
+#   digits = 3, 
+#   caption = "Proportion of summed individual trawl concentration")
+
+xtable.prop.conc.types <- 
+  xtable(table.gl.2014.conc.totals.by.size.comp.prop, 
+         digits = 3, 
+         caption = "Proportion of individual trawl concentration")
+
+prop.conc.data <- 
+  write.csv(
+    table.gl.2014.conc.totals.by.size.comp.prop, 
+    file = "./outfiles_final/final_proportion_total_conc_by_size_table.csv", 
+    na = "NA")
+
+table.gl.2014.conc.totals.by.size.comp.prop.round <- 
+  cbind('Size (µm)' = table.gl.2014.conc.totals.by.size.comp.prop[,1], 
+        round(table.gl.2014.conc.totals.by.size.comp.prop[,-1],3))
+
+datatable(table.gl.2014.conc.totals.by.size.comp.prop.round,
+          options = list(pageLength = 3),
+          caption = "Proportion of individual trawl concentration"
+          )
+```
+
+```{r barplot_trawl_prop_tot_plastic_type_by_size_class}
+table.conc.tot.by.size.comp.prop.long <- 
+  melt(table.gl.2014.conc.totals.by.size.comp.prop, 
+       measure.vars = c("Fragment", 
+                         "Film", 
+                         "Line", 
+                         "Nurdle", 
+                         "Sphere", 
+                         "Foam", 
+                         "Paint"), 
+       id.vars = c("Size (µm)"), 
+       value.name = "Proportion", 
+       variable.name = "Plastic type", 
+       na.rm = TRUE)
+
+classPalette <- c("deepskyblue3", "orange3", "firebrick","darkolivegreen3","deeppink3","gold1", "cadetblue3", "coral1")
+
+# ggplot(table.conc.tot.by.size.comp.prop.long, 
+#        aes(x = as.factor("Size (µm)"), 
+#            y = Proportion, 
+#            fill = "Plastic type")) +   
+#   theme_bw()+
+#   scale_fill_manual(values=classPalette)+
+#   geom_bar() +
+#   xlab("plastic size fraction (µm)")+
+#   ylab("% of total plastic counted")+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+#   ggtitle("Sample composition by plastic shape class")
+
+
+```
+
+
+```{r table_gl_2014_trawl_conc_mean_by_size_conc_type, results = "asis"}
+
+table.gl.2014.conc.by.size.comp.melt.nona <- 
+  na.omit(table.gl.2014.conc.by.size.comp.melt)
+
+trawl.mean.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.conc.by.size.comp.melt.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.conc.by.size.comp.mean <-
+  aggregate(data=table.gl.2014.conc.by.size.comp.melt.nona, 
+            concentration~size_fraction_um+conc_type,
+            mean)
+ 
+table.gl.2014.conc.by.size.comp.mean.cast <-
+  dcast(table.gl.2014.conc.by.size.comp.mean,
+        size_fraction_um~conc_type,
+        fill = NA,
+        value.var = "concentration")
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(table.gl.2014.conc.by.size.comp.mean.cast) <- 
+  conc.type.col.names.w.tot
+
+table.gl.2014.conc.by.size.comp.mean.cast$n <- 
+  trawl.mean.conc.size.count$total_conc_km2
+
+xtable.mean.conc.types <- 
+  xtable(table.gl.2014.conc.by.size.comp.mean.cast, 
+         digits = 3, 
+         caption = "Mean of individual trawl concentration")
+
+mean.conc.data <- 
+  write.csv(
+    table.gl.2014.conc.by.size.comp.mean.cast, 
+    file = "./outfiles_final/final_trawl_mean_conc_by_size_table.csv", 
+    na = "NA")
+
+table.gl.2014.conc.by.size.comp.mean.cast.round <- 
+  cbind('Size (µm)' = table.gl.2014.conc.by.size.comp.mean.cast[,1], 
+        round(table.gl.2014.conc.by.size.comp.mean.cast[,-1],3))
+
+```
+
+```{r table_gl_2014_trawl_conc_sd_by_size_conc_type, results = "asis"}
+
+table.gl.2014.conc.by.size.comp.melt.nona <- 
+  na.omit(table.gl.2014.conc.by.size.comp.melt)
+
+trawl.sd.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.conc.by.size.comp.melt.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.conc.by.size.comp.sd <-
+  aggregate(data=table.gl.2014.conc.by.size.comp.melt.nona, 
+            concentration~size_fraction_um+conc_type,
+            sd)
+ 
+table.gl.2014.conc.by.size.comp.sd.cast <-
+  dcast(table.gl.2014.conc.by.size.comp.sd,
+        size_fraction_um~conc_type,
+        fill = NA,
+        value.var = "concentration")
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(table.gl.2014.conc.by.size.comp.sd.cast) <- conc.type.col.names.w.tot
+
+table.gl.2014.conc.by.size.comp.sd.cast$n <- 
+  trawl.sd.conc.size.count$total_conc_km2
+
+xtable.sd.conc.types <- 
+  xtable(table.gl.2014.conc.by.size.comp.sd.cast, 
+         digits = 3, 
+         caption = "Standard deviation of individual trawl concentration")
+
+sd.conc.data <- 
+  write.csv(
+    table.gl.2014.conc.by.size.comp.sd.cast, 
+    file = "./outfiles_final/final_sd_conc_by_size_table.csv", 
+    na = "NA")
+
+table.gl.2014.conc.by.size.comp.sd.cast.round <- 
+  cbind('Size (µm)' = table.gl.2014.conc.by.size.comp.sd.cast[,1], 
+        round(table.gl.2014.conc.by.size.comp.sd.cast[,-1],3))
+
+```
+
+```{r table_gl_2014_trawl_conc_means_sd_by_type, results = "asis"}
+conc.mean.matrix <- 
+  as.matrix(
+    round(
+      table.gl.2014.conc.by.size.comp.mean.cast[,2:10], 0))
+
+conc.sd.matrix <- 
+  as.matrix(
+    round(
+      table.gl.2014.conc.by.size.comp.sd.cast[,2:10], 0))
+
+conc.mean.sd <- 
+  as.data.frame(
+    matrix(
+      paste(
+        format(
+          conc.mean.matrix), 
+        format(
+          conc.sd.matrix), 
+        sep =" +/- "), 
+      nrow = nrow(conc.mean.matrix),
+      dimnames = dimnames(conc.mean.matrix)))
+                              
+trawl.conc.size.mean.sd <- cbind(
+  table.gl.2014.conc.by.size.comp.mean.cast$`Size (µm)`, 
+  conc.mean.sd
+)
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(trawl.conc.size.mean.sd) <- conc.type.col.names.w.tot
+
+trawl.conc.size.mean.sd$n <- 
+  trawl.mean.conc.size.count$total_conc_km2
+
+xtable.trawl.conc.size.mean.sd <- 
+  xtable(trawl.conc.size.mean.sd, 
+         caption = "Mean and standard deviation of individual trawl concentration (km^-2)")
+
+mean.sd.conc.data <- 
+  write.csv(
+    trawl.conc.size.mean.sd, 
+    file = "./outfiles_final/final_mean_sd_trawl_conc_by_size_table.csv", 
+    na = "NA")
+
+datatable(trawl.conc.size.mean.sd,
+          options = list(pageLength = 3),
+          caption = "Mean and standard deviation of individual trawl concentration (km^-2)"
+          )
+```
+
+
+### Figures per trawl by size
+```{r plot_gl.all.trawl.data.nonnumeric.long.comp.conc_by_size.boxplot}
+
+fracpal <- c("#ebb444", "#1daf7e", "#8c1717")
+
+ggplot(gl.all.trawl.data.nonnumeric.long.comp, 
+       aes(x = size_fraction_um, 
+           y = concentration+1)) + 
+  geom_boxplot(aes(fill = size_fraction_um, alpha = 0.5)) + 
+ #geom_point(position = position_jitter(width = 0.5), colour="gray48")+
+  theme_bw()+
+  scale_y_log10(limits = c(100, 2000000), breaks = c(100, 1000, 10000, 100000, 100000, 1000000)) + 
+    xlab("")+
+  ylab("% of total plastic counted")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  labs(x= "particle size class (µm)", y = "plastic concentration per trawl (km-2)") + 
+  scale_fill_manual(values = fracpal) + 
+  theme(legend.position="none") +
+  ggtitle("Trawl plastic concentrations per size class")
+
+```
+
+```{r plot_gl.all.trawl.data.nonnumeric.long.comp.plastic_types_by_size.barplot, fig.height=6, fig.width=8}
+
+gl.all.trawl.data.nonnumeric.long.comp.noNA$conc_type <- factor(gl.all.trawl.data.nonnumeric.long.comp.noNA$conc_type, levels = c("fragment_conc_km2","line_conc_km2","film_conc_km2","foam_conc_km2","nurdle_conc_km2","sphere_conc_km2","paint_conc_km2"))
+
+# define a custom color palette for the shape classes
+classPalette <- c("deepskyblue3", "firebrick","darkolivegreen3","deeppink3","gold1", "cadetblue3", "coral1")
+
+ggplot(gl.all.trawl.data.nonnumeric.long.comp.noNA, 
+       aes(x = factor(size_fraction_um), 
+           y=concentration,
+           fill = conc_type)) +   
+  theme_bw()+
+  scale_fill_manual(values=classPalette)+
+  geom_bar(stat = "identity", position = "fill") +
+  xlab("plastic size fraction (µm)")+
+  ylab("% of total plastic counted")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_y_continuous(labels = percent_format()) +
+  ggtitle("Sample composition by plastic shape class")
+
+```
+
+```{r plot_gl.all.trawl.data.nonnumeric.long.comp.noNA_shape_station_size.boxplot, fig.height=7, fig.width=12}
+
+ggplot(gl.all.trawl.data.nonnumeric.long.comp.noNA, aes(x = factor(conc_type), y=concentration,fill = conc_type)) +   
+  theme_bw()+
+  scale_fill_manual(values=classPalette)+
+  geom_boxplot() +
+  scale_y_log10(breaks = c(100, 1000, 10000, 100000, 100000, 1000000)) + 
+  xlab("plastic morphology class")+
+  ylab("plastic concentration (km-2)")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  facet_grid(size_fraction_um~station_class)+
+  ggtitle("Trawl concentrations by plastic size class, shape, and station type")
+
+```
+
+```{r plot_gl.all.trawl.data.nonnumeric.long.tot_size_station_waterbody.boxplot}
+
+stationPalette <- c( "blue","cyan","maroon","red","orange")
+
+ggplot(gl.all.trawl.data.nonnumeric.long.tot, 
+       aes(x = factor(water_body), 
+           y=concentration)) +   
+  theme_bw()+
+  scale_colour_manual(values=stationPalette, name="Station Class")+
+  geom_boxplot() +
+  geom_jitter(aes(color = station_class), size=1) +
+  scale_y_log10(breaks = c(100, 1000, 10000, 100000, 100000, 1000000)) + 
+  xlab("Water Body")+
+  ylab("plastic concentration (km-2)")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  facet_grid(.~size_fraction_um)+
+  ggtitle("Trawl concentrations by water body and station type")
+
+```
+
+
+```{r plot_gl.all.trawl.data.nonnumeric.long.tot_size_waterbody_station.boxplot}
+
+ggplot(gl.all.trawl.data.nonnumeric.long.tot, 
+       aes(x = factor(station_class), 
+           y=concentration)) +   
+  theme_bw()+
+  geom_boxplot() +
+  geom_jitter(aes(color = water_body, shape = water_body, fill = water_body), size=1.5) +
+  scale_shape_manual(values=c(21,22,23,24,25,8)) +
+  scale_y_log10(breaks = c(100, 1000, 10000, 100000, 100000, 1000000)) + 
+  xlab("Station class") +
+  ylab("Plastic concentration (km-2)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(.~size_fraction_um) +
+  ggtitle("Trawl concentrations by station type and water body")
+
+```
+
+### Summary tables by station type
+
+```{r table_gl_2014_trawl_conc_prop_midsize_conc_type_class}
+
+## Long format of no fiber data with only 1000-4750um
+
+trawl.prop.conc.class.a <- 
+  subset(gl.all.trawl.data.nonnumeric.long,
+         conc_type != 'fiber_conc_km2' & size_fraction_um == '1000-4750')
+
+trawl.prop.conc.class.b <- 
+  na.omit(trawl.prop.conc.class.a)
+
+trawl.prop.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        trawl.prop.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+trawl.prop.conc.class.c <-
+  aggregate(data = trawl.prop.conc.class.b,
+            concentration~station_class+conc_type,
+            sum, 
+            na.action = na.exclude)
+
+trawl.prop.conc.class.d <-
+  dcast(trawl.prop.conc.class.c,
+        station_class~conc_type,
+        value.var = "concentration",
+        fill = NA_real_)
+
+trawl.prop.conc.class.e <-
+  cbind(trawl.prop.conc.class.d$'station_class', 
+        trawl.prop.conc.class.d[,2:8]/trawl.prop.conc.class.d$'total_conc_km2')
+
+conc.type.col.names.class <- c("Station type", 
+                         "Fragment", 
+                         "Film", 
+                         "Line", 
+                         "Nurdle", 
+                         "Sphere", 
+                         "Foam", 
+                         "Paint")
+
+colnames(trawl.prop.conc.class.e) <- 
+  conc.type.col.names.class
+
+trawl.prop.conc.class.e$n <- 
+  trawl.prop.conc.class.count$total_conc_km2
+
+xtable.trawl.prop.conc.class.e <- 
+  xtable(trawl.prop.conc.class.e, 
+         digits = 3, 
+         caption = "Proportion of individual trawl concentrations, 1000-4750 µm fraction")
+
+trawl.prop.conc.class <- 
+  write.csv(
+    trawl.prop.conc.class.e, 
+    file = "./outfiles_final/final_proportion_ind_trawl_conc_midsize_by_station_class_table.csv", 
+    na = "NA")
+
+trawl.prop.conc.class.f <- 
+  cbind('Station type' = trawl.prop.conc.class.e[,1], 
+        round(trawl.prop.conc.class.e[,-1],3))
+
+datatable(trawl.prop.conc.class.f, 
+          options = list(pageLength = 10),
+          caption = "Proportion of individual trawl concentrations, 1000-4750 µm fraction"
+          )
+```
+
+```{r table_gl_2014_trawl_conc_mean_midsize_conc_type_class, results = "asis"}
+
+trawl.mean.conc.class.a <- 
+  subset(gl.all.trawl.data.nonnumeric.long,
+         size_fraction_um == '1000-4750')
+
+trawl.mean.conc.class.b <- 
+  na.omit(trawl.mean.conc.class.a)
+
+trawl.mean.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        trawl.mean.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+trawl.mean.conc.class.c <-
+  aggregate(data = trawl.mean.conc.class.b, 
+            concentration~station_class+conc_type,
+            mean)
+ 
+trawl.mean.conc.class.d <-
+  dcast(trawl.mean.conc.class.c,
+        station_class~conc_type,
+        fill = NA,
+        value.var = "concentration")
+
+conc.type.col.names.w.tot <- c("Station type", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(trawl.mean.conc.class.d) <- 
+  conc.type.col.names.w.tot
+
+trawl.mean.conc.class.d$n <- 
+  trawl.mean.conc.class.count$total_conc_km2
+
+xtable.trawl.mean.conc.class.d <- 
+  xtable(trawl.mean.conc.class.d, 
+         digits = 3, 
+         caption = "Mean of individual trawl concentrations (km^-2), 1000-4750 µm fraction")
+
+mean.conc.data <- 
+  write.csv(
+    trawl.mean.conc.class.d, 
+    file = "./outfiles_final/final_mean_ind_trawl_conc_by_class_table.csv", 
+    na = "NA")
+
+trawl.mean.conc.class.e <- 
+  cbind('Station type' = trawl.mean.conc.class.d[,1], 
+        round(trawl.mean.conc.class.d[,-1],0))
+
+```
+
+```{r table_gl_2014_trawl_conc_sd_midsize_conc_type_class, results = "asis"}
+
+trawl.sd.conc.class.a <- 
+  subset(gl.all.trawl.data.nonnumeric.long,
+         size_fraction_um == '1000-4750')
+
+trawl.sd.conc.class.b <- 
+  na.omit(trawl.sd.conc.class.a)
+
+trawl.sd.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        trawl.sd.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+trawl.sd.conc.class.c <-
+  aggregate(data = trawl.sd.conc.class.b, 
+            concentration~station_class+conc_type,
+            sd)
+ 
+trawl.sd.conc.class.d <-
+  dcast(trawl.sd.conc.class.c,
+        station_class~conc_type,
+        fill = NA,
+        value.var = "concentration")
+
+conc.type.col.names.w.tot <- c("Station type", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total plastic", 
+                               "Fiber")
+
+colnames(trawl.sd.conc.class.d) <- 
+  conc.type.col.names.w.tot
+
+trawl.sd.conc.class.d$n <- 
+  trawl.sd.conc.class.count$total_conc_km2
+
+xtable.trawl.sd.conc.class.d <- 
+  xtable(trawl.sd.conc.class.d, 
+         digits = 3, 
+         caption = "Standard deviation of individual trawl concentrations, 1000-4750 µm fraction")
+
+trawl.sd.conc.class.data <- 
+  write.csv(
+    trawl.sd.conc.class.d, 
+    file = "./outfiles_final/final_sd_ind_trawl_conc_class.csv", 
+    na = "NA")
+
+trawl.sd.conc.class.e <- 
+  cbind('Station type' = trawl.sd.conc.class.d[,1], 
+        round(trawl.sd.conc.class.d[,-1],0))
+
+```
+
+```{r table_gl_2014_trawl_conc_mean_sd_midsize_conc_type_class, results = "asis"}
+trawl.mean.conc.class.matrix <- 
+  as.matrix(
+    round(
+      trawl.mean.conc.class.d[,c(2:10)], 0))
+
+trawl.sd.conc.class.matrix <- 
+  as.matrix(
+    round(
+      trawl.sd.conc.class.d[,c(2:10)], 0))
+
+trawl.mean.sd.conc.class <- 
+  as.data.frame(
+    matrix(
+      paste(
+        format(
+          trawl.mean.conc.class.matrix), 
+        format(
+          trawl.sd.conc.class.matrix), 
+        sep =" +/- "), 
+      nrow = nrow(trawl.mean.conc.class.matrix),
+      dimnames = dimnames(trawl.mean.conc.class.matrix)))
+                              
+trawl.mean.sd.conc.class <- cbind(
+  trawl.mean.conc.class.d$`Station type`, 
+  trawl.mean.sd.conc.class
+  )
+
+conc.type.col.names.w.tot <- c("Station type", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total plastic", 
+                               "Fiber")
+
+colnames(trawl.mean.sd.conc.class) <- 
+  conc.type.col.names.w.tot
+
+trawl.mean.sd.conc.class$n <- 
+  trawl.mean.conc.class.count$total_conc_km2
+
+xtable.trawl.mean.sd.conc.class <- 
+  xtable(trawl.mean.sd.conc.class, 
+         caption = "Mean and standard deviation of individual trawl concentration (km^-2), 1000-4750 µm fraction")
+
+mean.sd.conc.data <- 
+  write.csv(
+    trawl.mean.sd.conc.class, 
+    file = "./outfiles_final/final_mean_sd_trawl_midsize_conc_by_class.csv", 
+    na = "NA")
+
+datatable(trawl.mean.sd.conc.class, 
+          options = list(pageLength = 10),
+          caption = "Mean and standard deviation of individual trawl concentration (km^-2), 1000-4750 µm fraction"
+          )
+```
+
+## Data by station (mean of trawls at each station)
+
+```{r data_gl_2014_stn_mean_conc}
+
+## Create a dataframe of mean concentrations by station 
+
+table.gl.2014.conc.by.stn.size.comp.melt <- 
+  melt(gl.2014.plastics.conc.df, 
+       measure.vars = c('fragment_conc_km2', 
+                        'film_conc_km2', 
+                        'line_conc_km2', 
+                        'nurdle_conc_km2', 
+                        'sphere_conc_km2', 
+                        'foam_conc_km2', 
+                        'paint_conc_km2',
+                        'total_conc_km2', 
+                        'fiber_conc_km2'), 
+       id.vars = c('station', 
+                   'size_fraction_um'), 
+       value.name = "concentration", 
+       variable.name = "conc_type", 
+       na.rm = FALSE)
+
+table.gl.2014.conc.by.stn.size.comp.melt.nona <- 
+  na.omit(table.gl.2014.conc.by.stn.size.comp.melt)
+
+gl.2014.stn.conc.wide <- 
+  dcast(
+    table.gl.2014.conc.by.stn.size.comp.melt.nona, 
+    station + size_fraction_um ~ conc_type, 
+    value.var = 'concentration', 
+    mean, 
+    fill = NA_real_)
+
+table.gl.2014.stn.conc.by.size.comp.long <- 
+  melt(gl.2014.stn.conc.wide, 
+       measure.vars = c('fragment_conc_km2', 
+                        'film_conc_km2', 
+                        'line_conc_km2', 
+                        'nurdle_conc_km2', 
+                        'sphere_conc_km2', 
+                        'foam_conc_km2', 
+                        'paint_conc_km2',
+                        'total_conc_km2', 
+                        'fiber_conc_km2'), 
+       id.vars = c('station','size_fraction_um'), 
+       value.name = "mean_concentration", 
+       variable.name = "conc_type", 
+       na.rm = FALSE)
+
+```
+
+### Summary tables by size
+
+```{r summary_gl_2014_stn_mean_total_conc_by_size_fraction}
+
+stn.tot.conc.summary.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('station','size_fraction_um'), 
+    function(x) summary(x$'concentration'))
+
+stn.tot.conc.sd.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('station','size_fraction_um'), 
+    function(x) sd(x$'concentration'))
+
+stn.tot.conc.iqr.by.size <- 
+  ddply(
+    table.gl.2014.conc.by.size.comp.melt.nona.tot, 
+    c('station','size_fraction_um'), 
+    function(x) IQR(x$'concentration'))
+
+stn.tot.conc.summary.by.size$StDev. <- 
+  round(stn.tot.conc.sd.by.size$V1, 0)
+
+stn.tot.conc.summary.by.size$IQR <- 
+  round(stn.tot.conc.iqr.by.size$V1, 0)
+
+stn.tot.conc.summary.by.size$Range <- 
+  stn.tot.conc.summary.by.size$Max. - stn.tot.conc.summary.by.size$Min.
+
+stn.tot.conc.summary.by.size$MNR <- 
+  round((stn.tot.conc.summary.by.size$Range/ stn.tot.conc.summary.by.size$Mean), 3)
+  
+stn.tot.conc.summary.by.size$MNR[is.na(stn.tot.conc.summary.by.size$MNR)] <- NA
+
+stn.tot.conc.summary.by.size$CoV <- 
+  round((stn.tot.conc.summary.by.size$StDev./ stn.tot.conc.summary.by.size$Mean), 3)
+
+datatable(
+  stn.tot.conc.summary.by.size,
+  options = list(pageLength = 20),
+  caption = "Summary of station mean total plastic concentrations (km^-2)")
+  
+stn.tot.conc.summary.by.size.table <- 
+  write.csv(
+    stn.tot.conc.summary.by.size, 
+    file = "./outfiles_final/final_data_sheet_3_stn.tot.conc.summary.by.size_table.csv",
+    na = "NA")
+
+```
+
+#### Mean-normalized station range plots
+
+```{r plot_gl_2014_mnr_size_class}
+fracpal <- c("#ebb444", "#1daf7e", "#8c1717")
+
+ggplot(stn.tot.conc.summary.by.size, aes(y = MNR, x = size_fraction_um)) +
+  theme_bw() +
+  geom_boxplot(aes(fill = size_fraction_um), alpha = 0.5) +
+  scale_fill_manual(values = fracpal)
+```
+
+```{r plot_gl_2014_mnr_size_class_station_jitter}
+
+gl.2014.trawl.conc.sum.data <- 
+  merge(gl.2014.all.data, stn.tot.conc.summary.by.size, 
+        by = c("station", "size_fraction_um"), 
+        all.x = TRUE, 
+        suffixes = c(".x", ".y"))
+
+ggplot(gl.2014.trawl.conc.sum.data, aes(x = factor(size_fraction_um), y=MNR)) +
+  scale_colour_manual(values=stationPalette, name="Station Class")+
+  geom_boxplot(alpha=0.5) +
+  geom_jitter(aes(color = station_class), size=1) 
+
+```
+
+```{r plot_gl_2014_mnr_station_type_class}
+
+ggplot(gl.2014.trawl.conc.sum.data, aes(y = MNR, x = station_class)) +
+  scale_colour_manual(values=fracpal, name="Size Class")+
+  geom_boxplot(alpha=0.5) +
+  geom_jitter(aes(color = size_fraction_um), size=1) 
+  
+```
+
+```{r plot_gl_2014_mnr_by_trawl_totals_all_size_color, fig.height=8, fig.width=12}
+
+ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$MNR),], 
+         aes(y = MNR, x = total_conc_km2)) + 
+  geom_hline(data = gl.2014.trawl.conc.sum.data,
+             aes(yintercept= 1),
+             linetype = "dashed",
+             size = 0.5, 
+             color = "red") +
+    geom_point(size = 2.0, 
+               alpha = 0.85,
+               aes(color = size_fraction_um, 
+                   fill = size_fraction_um)) + 
+  geom_smooth(method = "lm", alpha = 0.2, aes(colors = "black")) +
+  scale_x_log10() + 
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,3)) + 
+  scale_color_manual(values = fracpal)
+
+```
+
+``` {r lm_mnr_tot_conc}
+lm_trawl_tot_mnr <- 
+  lm(data = gl.2014.trawl.conc.sum.data, 
+     formula = MNR ~ log10(total_conc_km2+1), 
+     na.action = na.omit)
+
+summary(lm_trawl_tot_mnr)
+```
+
+```{r plot_gl_2014_mnr_by_trawl_totals_all_size_stn_class, fig.height=8, fig.width=12}
+
+ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$MNR),], 
+         aes(y = MNR, x = total_conc_km2)) +
+    geom_point(size = 2, 
+               alpha = 1,
+               aes(color = station_class, 
+                   shape = factor(size_fraction_um))) + 
+  geom_smooth(method = "lm", alpha = 0.2) +
+  scale_x_log10() + 
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,3)) + 
+  geom_hline(data = gl.2014.trawl.conc.sum.data,
+             aes(yintercept= 1),
+             linetype = "dashed",
+             size = 0.5, 
+             color = "red") 
+
+```
+
+```{r plot_gl_2014_mnr_by_stn_mean}
+
+gl.2014.trawl.conc.sum.data <- 
+  merge(gl.2014.all.data, stn.tot.conc.summary.by.size, 
+        by = c("station", "size_fraction_um"), 
+        all.x = TRUE, 
+        suffixes = c(".x", ".y"))
+
+  ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$MNR),],aes(y = MNR, x = Mean, color = station_class)) +
+   geom_point(aes(color = factor(station_class)),
+                  size = 0.8,
+                  alpha = 0.5) + 
+  geom_smooth(method = "lm", alpha = 0.2) +
+  scale_x_log10() +
+  facet_grid(.~ size_fraction_um, scales="free") +
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,3))
+
+```
+
+```{r table_gl_2014_stn_conc_proportion_by_size_conc_type, results = "asis"}
+
+table.gl.2014.stn.conc.by.size.comp.long.nona <- 
+  na.omit(table.gl.2014.stn.conc.by.size.comp.long)
+
+stn.prop.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.stn.conc.by.size.comp.long.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.stn.conc.by.size.comp.sum <-
+  aggregate(data = table.gl.2014.stn.conc.by.size.comp.long.nona,
+            mean_concentration~size_fraction_um+conc_type,
+            sum, 
+            na.action = na.exclude)
+ 
+table.gl.2014.stn.conc.by.size.comp.sum.cast <-
+  dcast(table.gl.2014.stn.conc.by.size.comp.sum,
+        size_fraction_um~conc_type,
+        value.var = "mean_concentration",
+        fill = NA_real_)
+
+table.gl.2014.stn.conc.totals.by.size.comp.prop <-
+  cbind(table.gl.2014.stn.conc.by.size.comp.sum.cast$'size_fraction_um', 
+        table.gl.2014.stn.conc.by.size.comp.sum.cast[,2:8]/table.gl.2014.stn.conc.by.size.comp.sum.cast$'total_conc_km2')
+
+conc.type.col.names <- c("Size (µm)", 
+                         "Fragment", 
+                         "Film", 
+                         "Line", 
+                         "Nurdle", 
+                         "Sphere", 
+                         "Foam", 
+                         "Paint")
+
+colnames(table.gl.2014.stn.conc.totals.by.size.comp.prop) <- 
+  conc.type.col.names
+
+table.gl.2014.stn.conc.totals.by.size.comp.prop$n <- 
+  stn.prop.conc.size.count$total_conc_km2
+
+xtable.prop.stn.conc.types <- 
+  xtable(table.gl.2014.stn.conc.totals.by.size.comp.prop, 
+         digits = 3, 
+         caption = "Proportion of mean station concentration")
+
+prop.stn.conc.data <- 
+  write.csv(
+    table.gl.2014.stn.conc.totals.by.size.comp.prop, 
+    file = "./outfiles_final/final_proportion_mean_stn_conc_by_size_table.csv", 
+    na = "NA")
+
+table.gl.2014.stn.conc.totals.by.size.comp.prop.round <- 
+  cbind('Size (µm)' = table.gl.2014.stn.conc.totals.by.size.comp.prop[,1], 
+        round(table.gl.2014.stn.conc.totals.by.size.comp.prop[,-1],3))
+
+datatable(table.gl.2014.stn.conc.totals.by.size.comp.prop.round, 
+          options = list(pageLength = 3),
+          caption = "Proportion of mean station concentration"
+          )
+```
+
+```{r table_gl_2014_stn_conc_mean_by_size_conc_type, results = "asis"}
+
+table.gl.2014.stn.conc.by.size.comp.long.nona <- 
+  na.omit(table.gl.2014.stn.conc.by.size.comp.long)
+
+stn.mean.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.stn.conc.by.size.comp.long.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.stn.conc.by.size.comp.mean <-
+  aggregate(data = table.gl.2014.stn.conc.by.size.comp.long.nona, 
+            mean_concentration~size_fraction_um+conc_type,
+            mean)
+ 
+table.gl.2014.stn.conc.by.size.comp.mean.cast <-
+  dcast(table.gl.2014.stn.conc.by.size.comp.mean,
+        size_fraction_um~conc_type,
+        fill = NA,
+        value.var = "mean_concentration")
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total plastic", 
+                               "Fiber")
+
+colnames(table.gl.2014.stn.conc.by.size.comp.mean.cast) <- 
+  conc.type.col.names.w.tot
+
+table.gl.2014.stn.conc.by.size.comp.mean.cast$n <- 
+  stn.mean.conc.size.count$total_conc_km2
+
+xtable.mean.stn.conc.types <- 
+  xtable(table.gl.2014.stn.conc.by.size.comp.mean.cast, 
+         digits = 3, 
+         caption = "Mean of station mean concentration (km^-2)")
+
+mean.stn.conc.data <- 
+  write.csv(
+    table.gl.2014.stn.conc.by.size.comp.mean.cast, 
+    file = "./outfiles_final/final_mean_mean_stn_conc_by_size_table.csv",
+    na = "NA")
+
+table.gl.2014.stn.conc.by.size.comp.mean.cast.round <- 
+  cbind('Size (µm)' = table.gl.2014.stn.conc.by.size.comp.mean.cast[,1], 
+        round(table.gl.2014.stn.conc.by.size.comp.mean.cast[,-1],3))
+
+```
+
+```{r table_gl_2014_stn_conc_sd_by_size_conc_type, results = "asis"}
+
+table.gl.2014.stn.conc.by.size.comp.long.nona <- 
+  na.omit(table.gl.2014.stn.conc.by.size.comp.long)
+
+stn.sd.conc.size.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        table.gl.2014.stn.conc.by.size.comp.long.nona[,c('size_fraction_um', 'conc_type')]
+        )
+      ),
+    size_fraction_um~conc_type
+  )
+
+table.gl.2014.stn.conc.by.size.comp.sd <-
+  aggregate(data = table.gl.2014.stn.conc.by.size.comp.long.nona, 
+            mean_concentration~size_fraction_um+conc_type,
+            sd)
+ 
+table.gl.2014.stn.conc.by.size.comp.sd.cast <-
+  dcast(table.gl.2014.stn.conc.by.size.comp.sd,
+        size_fraction_um~conc_type,
+        fill = NA,
+        value.var = "mean_concentration")
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(table.gl.2014.stn.conc.by.size.comp.sd.cast) <- 
+  conc.type.col.names.w.tot
+
+table.gl.2014.stn.conc.by.size.comp.sd.cast$n <- 
+  stn.sd.conc.size.count$total_conc_km2
+
+xtable.sd.stn.conc.types <- 
+  xtable(table.gl.2014.stn.conc.by.size.comp.sd.cast, 
+         digits = 3, 
+         caption = "Standard deviation of station mean concentrations")
+
+sd.stn.conc.data <- 
+  write.csv(
+    table.gl.2014.stn.conc.by.size.comp.sd.cast, 
+    file = "./outfiles_final/final_sd_mean_stn_conc_by_size_table.csv",
+    na = "NA")
+
+table.gl.2014.stn.conc.by.size.comp.sd.cast.round <- 
+  cbind('Size (µm)' = table.gl.2014.stn.conc.by.size.comp.sd.cast[,1], 
+        round(table.gl.2014.stn.conc.by.size.comp.sd.cast[,-1],3))
+
+```
+
+```{r tabl_gl_2014_stn_conc_means_sd_by_size_conc_type, results = "asis"}
+stn.mean.conc.size.matrix <- 
+  as.matrix(
+    round(
+      table.gl.2014.stn.conc.by.size.comp.mean.cast[,-1],0
+      )
+    )
+
+stn.sd.conc.size.matrix <- 
+  as.matrix(
+    round(
+      table.gl.2014.stn.conc.by.size.comp.sd.cast[,-1],0
+      )
+    )
+
+stn.conc.size.mean.sd <- 
+  as.data.frame(
+    matrix(
+      paste(
+        format(stn.mean.conc.size.matrix), 
+        format(stn.sd.conc.size.matrix), 
+        sep =" +/- "), 
+      nrow = nrow(stn.mean.conc.size.matrix),
+      dimnames = dimnames(stn.mean.conc.size.matrix)))
+                              
+stn.conc.size.mean.sd <- 
+  cbind(
+    table.gl.2014.stn.conc.by.size.comp.mean.cast$`Size (µm)`, 
+    stn.conc.size.mean.sd
+)
+
+conc.type.col.names.w.tot <- c("Size (µm)", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total plastic", 
+                               "Fiber")
+
+colnames(stn.conc.size.mean.sd) <- 
+  conc.type.col.names.w.tot
+ 
+stn.conc.size.mean.sd$n <- 
+  stn.mean.conc.size.count$total_conc_km2
+
+xtable.stn.conc.size.mean.sd <- 
+  xtable(stn.conc.size.mean.sd, 
+         caption = "Mean and standard deviation of station mean concentration (km^-2)")
+
+mean.sd.stn.conc.data <- 
+  write.csv(
+    stn.conc.size.mean.sd, 
+    file = "./outfiles_final/final_mean_sd_stn_mean_conc_by_size_table.csv", 
+    na = "NA")
+
+datatable(stn.conc.size.mean.sd, 
+          options = list(pageLength = 3),
+          caption = "Mean and standard deviation of station mean concentration (km^-2)"
+          )
+```
+
+
+#### CoV station range plots
+
+```{r plot_gl_2014_cov_size_class}
+ggplot(stn.tot.conc.summary.by.size, aes(y = CoV, x = size_fraction_um)) +
+  geom_boxplot(aes(fill = size_fraction_um), alpha = 0.5) +
+  theme_bw() +
+  scale_fill_manual(values = fracpal)
+```
+
+```{r plot_gl_2014_cov_by_trawl_totals_all_size_color, fig.height=8, fig.width=12}
+
+ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$CoV),], 
+         aes(y = CoV, x = total_conc_km2)) + 
+  geom_hline(data = gl.2014.trawl.conc.sum.data,
+             aes(yintercept= 1),
+             linetype = "dashed",
+             size = 0.5, 
+             color = "red") +
+    geom_point(size = 2.0, 
+               alpha = 0.85,
+               aes(color = size_fraction_um, 
+                   fill = size_fraction_um)) + 
+  geom_smooth(method = "lm", alpha = 0.2, aes(colors = "black")) +
+  scale_x_log10() + 
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,1.75)) + 
+  scale_color_manual(values = fracpal)
+```
+
+``` {r lm_cov_tot_conc}
+
+lm_trawl_tot_cov <- 
+  lm(data = gl.2014.trawl.conc.sum.data, 
+     formula = CoV ~ log10(total_conc_km2+1), 
+     na.action = na.omit)
+
+summary(lm_trawl_tot_cov)
+```
+
+```{r plot_gl_2014_cov_by_trawl_totals_all_size_stn_class, fig.height=8, fig.width=12}
+
+ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$CoV),], 
+         aes(y = CoV, x = total_conc_km2)) +
+    geom_point(size = 2, 
+               alpha = 1,
+               aes(color = station_class, 
+                   shape = factor(size_fraction_um))) + 
+  geom_smooth(method = "lm", alpha = 0.2) +
+  scale_x_log10() + 
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,1.75)) + 
+  geom_hline(data = gl.2014.trawl.conc.sum.data,
+             aes(yintercept= 1),
+             linetype = "dashed",
+             size = 0.5, 
+             color = "red") 
+
+```
+
+```{r plot_gl_2014_cov_by_stn_mean}
+
+
+  ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$CoV),],
+         aes(y = CoV, 
+             x = Mean, 
+             color = station_class)) +
+   geom_point(aes(color = factor(station_class)),
+                  size = 0.8,
+                  alpha = 0.5) + 
+  geom_smooth(method = "lm", alpha = 0.2) +
+  scale_x_log10() +
+  facet_grid(.~ size_fraction_um, scales="free") +
+  theme(axis.text.x = element_text(size = 6, angle = 45, hjust = 1)) +
+  scale_y_continuous(limits = c(0,1.75))
+
+```
+
+
+### Summary tables by station type
+
+```{r summary_gl_2014_stn_mean_total_conc_metadata_by_size_fraction}
+
+gl.all.trawl.data.nonnumeric.long.nona.tot <- 
+   subset(gl.all.trawl.data.nonnumeric.long.nona, 
+      conc_type == 'total_conc_km2')
+#View(gl.all.trawl.data.nonnumeric.long.nona.tot)
+
+stn.tot.conc.mdata.summary.by.size <- 
+  ddply(
+    gl.all.trawl.data.nonnumeric.long.nona.tot, 
+    c('station',
+      'size_fraction_um', 
+      'water_body', 
+      'location', 
+      'station_class'), 
+    function(x) summary(x$'concentration'))
+
+stn.tot.conc.mdata.sd.by.size <- 
+  ddply(
+    gl.all.trawl.data.nonnumeric.long.nona.tot, 
+    c('station',
+      'size_fraction_um', 
+      'water_body', 
+      'location', 
+      'station_class'), 
+    function(x) sd(x$'concentration'))
+
+stn.tot.conc.mdata.iqr.by.size <- 
+  ddply(
+    gl.all.trawl.data.nonnumeric.long.nona.tot, 
+     c('station',
+      'size_fraction_um', 
+      'water_body', 
+      'location', 
+      'station_class'), 
+    function(x) IQR(x$'concentration'))
+
+stn.tot.conc.mdata.summary.by.size$StDev. <- 
+  round(stn.tot.conc.mdata.sd.by.size$V1, 0)
+
+stn.tot.conc.mdata.summary.by.size$IQR <- 
+  round(stn.tot.conc.mdata.iqr.by.size$V1, 0)
+
+stn.tot.conc.mdata.summary.by.size$Range <- 
+  stn.tot.conc.mdata.summary.by.size$Max. - 
+  stn.tot.conc.mdata.summary.by.size$Min.
+
+datatable(
+  stn.tot.conc.mdata.summary.by.size,
+  options = list(pageLength = 10),
+  caption = "Summary of station mean total plastic concentrations (km^-2)")
+  
+```
+
+The highest single trawl concentration is `r max(stn.tot.conc.mdata.summary.by.size$Max.)` km^-2, found in the `r stn.tot.conc.mdata.summary.by.size[which.max(stn.tot.conc.mdata.summary.by.size[,'Max.']),'size_fraction_um']` µm size fraction at the `r stn.tot.conc.mdata.summary.by.size[which.max(stn.tot.conc.mdata.summary.by.size[,'Max.']),'location']` of `r stn.tot.conc.mdata.summary.by.size[which.max(stn.tot.conc.mdata.summary.by.size[,'Max.']),'water_body']`.
+
+```{r table_gl_2014_station_conc_prop_midsize_conc_type_class}
+
+## Long format of data with only 1000-4750um
+
+stn.prop.conc.class.a <- 
+  subset(gl.all.data.nonnumeric.mean.stn.long,
+         conc_type != 'fiber_conc_km2' & size_fraction_um == '1000-4750')
+
+stn.prop.conc.class.b <- 
+  na.omit(stn.prop.conc.class.a)
+
+stn.prop.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        stn.prop.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+stn.prop.conc.class.c <-
+  aggregate(data = stn.prop.conc.class.b,
+            mean_concentration~station_class+conc_type,
+            sum, 
+            na.action = na.exclude)
+
+stn.prop.conc.class.d <-
+  dcast(stn.prop.conc.class.c,
+        station_class~conc_type,
+        value.var = "mean_concentration",
+        fill = NA_real_)
+
+stn.prop.conc.class.e <-
+  cbind(stn.prop.conc.class.d$'station_class', 
+        stn.prop.conc.class.d[,2:8]/stn.prop.conc.class.d$'total_conc_km2')
+
+conc.type.col.names.class <- c("Station type", 
+                         "Fragment", 
+                         "Film", 
+                         "Line", 
+                         "Nurdle", 
+                         "Sphere", 
+                         "Foam", 
+                         "Paint")
+
+colnames(stn.prop.conc.class.e) <- 
+  conc.type.col.names.class
+
+stn.prop.conc.class.e$n <- 
+  stn.prop.conc.class.count$total_conc_km2
+
+xtable.stn.prop.conc.class <- 
+  xtable(stn.prop.conc.class.e, 
+         digits = 3, 
+         caption = "Proportion of station mean concentrations, 1000-4750 µm fraction")
+
+prop.stn.midsize.class.conc.data <- 
+  write.csv(
+    stn.prop.conc.class.e, 
+    file = "./outfiles_final/final_proportion_stn_mean_conc_midsize_by_station_class_table.csv", 
+    na = "NA")
+
+stn.prop.conc.class.f <- 
+  cbind('Station type' = stn.prop.conc.class.e[,1], 
+        round(stn.prop.conc.class.e[,-1],3))
+
+datatable(stn.prop.conc.class.f, 
+          options = list(pageLength = 10),
+          caption = "Proportion of station mean concentrations, 1000-4750 µm fraction"
+          )
+```
+
+```{r table_gl_2014_station_conc_mean_midsize_conc_type_class, results = "asis"}
+
+stn.mean.conc.class.a <- 
+  subset(gl.all.data.nonnumeric.mean.stn.long,
+         size_fraction_um == '1000-4750')
+
+stn.mean.conc.class.b <- 
+  na.omit(stn.mean.conc.class.a)
+
+stn.mean.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        stn.mean.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+stn.mean.conc.class.c <-
+  aggregate(data = stn.mean.conc.class.b, 
+            mean_concentration~station_class+conc_type,
+            mean)
+ 
+stn.mean.conc.class.d <-
+  dcast(stn.mean.conc.class.c,
+        station_class~conc_type,
+        fill = NA,
+        value.var = "mean_concentration")
+
+conc.type.col.names.w.tot <- c("Station type", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total Plastic", 
+                               "Fiber")
+
+colnames(stn.mean.conc.class.d) <- 
+  conc.type.col.names.w.tot
+
+stn.mean.conc.class.d$n <- 
+  stn.mean.conc.class.count$total_conc_km2
+
+xtable.stn.mean.conc.class.d <- 
+  xtable(stn.mean.conc.class.d, 
+         digits = 3, 
+         caption = "Mean of station mean concentrations (km^-2), 1000-4750 µm fraction")
+
+mean.conc.data <- 
+  write.csv(
+    stn.mean.conc.class.d, 
+    file = "./outfiles_final/final_mean_stn_mean_conc_by_class_table.csv", 
+    na = "NA")
+
+stn.mean.conc.class.e <- 
+  cbind('Station type' = stn.mean.conc.class.d[,1], 
+        round(stn.mean.conc.class.d[,-1],0))
+
+```
+
+```{r table_gl_2014_station_conc_sd_midsize_conc_type_class, results = "asis"}
+
+stn.sd.conc.class.a <- 
+  subset(gl.all.data.nonnumeric.mean.stn.long,
+         size_fraction_um == '1000-4750')
+
+stn.sd.conc.class.b <- 
+  na.omit(stn.sd.conc.class.a)
+
+stn.sd.conc.class.count <- 
+  dcast(
+    as.data.frame(
+      table(
+        stn.sd.conc.class.b[,c('station_class', 'conc_type')]
+        )
+      ),
+    station_class~conc_type
+  )
+
+stn.sd.conc.class.c <-
+  aggregate(data = stn.sd.conc.class.b, 
+            mean_concentration~station_class+conc_type,
+            sd)
+ 
+stn.sd.conc.class.d <-
+  dcast(stn.sd.conc.class.c,
+        station_class~conc_type,
+        fill = NA,
+        value.var = "mean_concentration")
+
+conc.type.col.names.w.tot <- c("Station type", 
+                               "Fragment", 
+                               "Film", 
+                               "Line", 
+                               "Nurdle", 
+                               "Sphere", 
+                               "Foam", 
+                               "Paint", 
+                               "Total plastic", 
+                               "Fiber")
+
+colnames(stn.sd.conc.class.d) <- 
+  conc.type.col.names.w.tot
+
+stn.sd.conc.class.d$n <- 
+  stn.sd.conc.class.count$total_conc_km2
+
+xtable.stn.sd.conc.class.d <- 
+  xtable(stn.sd.conc.class.d, 
+         digits = 3, 
+         caption = "Standard deviation of station mean concentrations, 1000-4750 µm fraction")
+
+stn.sd.conc.class.data <- 
+  write.csv(
+    stn.sd.conc.class.d, 
+    file = "./outfiles_final/final_sd_stn_mean_conc_class.csv", 
+    na = "NA")
+
+stn.sd.conc.class.e <- 
+  cbind('Station type' = stn.sd.conc.class.d[,1], 
+        round(stn.sd.conc.class.d[,-1],0))
+
+```
+
+```{r table_gl_2014_station_conc_mean_sd_midsize_conc_type_class, results = "asis"}
+stn.mean.conc.class.matrix <- 
+  as.matrix(
+    round(
+      stn.mean.conc.class.d[,c(2:10)], 0))
+
+stn.sd.conc.class.matrix <- 
+  as.matrix(
+    round(
+      stn.sd.conc.class.d[,c(2:10)], 0))
+
+stn.mean.sd.conc.class <- 
+  as.data.frame(
+    matrix(
+      paste(
+        format(
+          stn.mean.conc.class.matrix), 
+        format(
+          stn.sd.conc.class.matrix), 
+        sep =" +/- "), 
+      nrow = nrow(stn.mean.conc.class.matrix),
+      dimnames = dimnames(stn.mean.conc.class.matrix)))
+                              
+stn.mean.sd.conc.class <- 
+  cbind(
+    stn.mean.conc.class.d$`Station type`, 
+    stn.mean.sd.conc.class
+  )
+
+conc.type.col.names.w.tot <- 
+  c("Station type", 
+    "Fragment", 
+    "Film", 
+    "Line", 
+    "Nurdle", 
+    "Sphere", 
+    "Foam", 
+    "Paint", 
+    "Total plastic", 
+    "Fiber")
+
+colnames(stn.mean.sd.conc.class) <- 
+  conc.type.col.names.w.tot
+
+stn.mean.sd.conc.class$n <- 
+  stn.mean.conc.class.count$total_conc_km2
+  
+# kable(stn.mean.sd.conc.class, 
+#       caption = "Mean and standard deviation of station mean concentration (km^-2), 1000-4750 µm fraction")
+
+xtable.stn.mean.sd.conc.class <- 
+  xtable(stn.mean.sd.conc.class, 
+         caption = "Mean and standard deviation of station mean concentration (km^-2), 1000-4750 µm fraction")
+
+mean.sd.conc.data <- 
+  write.csv(
+    stn.mean.sd.conc.class, 
+    file = "./outfiles_final/final_mean_sd_stn_midsize_conc_by_class.csv", 
+    na = "NA")
+
+datatable(stn.mean.sd.conc.class, 
+          options = list(pageLength = 10),
+          caption = "Mean and standard deviation of station mean concentration (km^-2), 1000-4750 µm fraction"
+          )
+```
+
+# Blank counts
+
+```{r table_gl_2014_blank_counts, results = "asis", echo=FALSE}
+
+blank.counts <- read.csv(
+  file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_blank_counts_all.csv")
+
+blank.counts[, colSums(blank.counts != 0) > 0] 
+
+blank.counts.data <- 
+  write.csv(
+    blank.counts, 
+    file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/outfiles_final/final_blank_counts_table.csv", 
+    na = "NA")
+
+datatable(blank.counts, 
+          options = list(pageLength = 10),
+          caption = "Counts of blank samples"
+          )
+```
+
+# EDS data
+
+```{r data_gl_2014_eds_calls}
+
+## Import into dataframe
+gl.2014.eds.calls <- 
+  read.csv(
+    file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_EDS_calls.csv")
+
+## Take out rows with no data (all spectra repeats)
+gl.2014.eds.calls <- 
+  na.omit(gl.2014.eds.calls)
+```
+
+```{r chisq_gl_2014_eds_calls}
+## Create a contingency table of P/NP calls vs. suspected type
+
+eds.calls.by.suspect <- 
+  table(
+    gl.2014.eds.calls[,c("suspected","final_call")])
+
+## Run a chi-square test for independence
+chisq.eds <- chisq.test(eds.calls.by.suspect)
+chisq.eds$p.value
+chisq.eds$alternative
+
+## Run a fisher test for the same thing, but for tables with small counts
+fisher.eds <- fisher.test(eds.calls.by.suspect, hybrid = TRUE, simulate.p.value = FALSE)
+
+fisher.eds$p.value
+fisher.eds$alternative
+
+## The p-value is very low, indicating that the data vary significantly from an even distribution, both between call types and between suspected type, but there is a warning that the results may be incorrect, considered some expected values are very close to zero
+#chisq.eds$expected
+
+## Take a look at the residuals to see how the distributions vary from the predicted "even" distribution
+#chisq.eds$residuals
+
+## It looks as if NP and M calls occur significantly more often in the nonplastic category, and the P and P-NP calls occur more often with the plastic category - yay!
+
+```
+ 
+I created a contingency table of a piece's suspected type vs. type determined from spectra:
+
+```{r EDS_calls_suspected}
+eds.calls.by.suspect
+```
+
+So we can see that 76% of all pieces visually identified as plastic were confirmed as plastic, while 12% couldn't be positively identified as plastic or not plastic by EDS. `r (35+46)`% of pieces were confirmed as not plastic, while only 7% of pieces were incorrectly identified as non-plastic.
+
+To test these percentages for significance, I performed a Chi-square test of independence on the contingency table:
+
+```{r chisq_EDS_calls_suspected}
+chisq.eds
+```
+
+It looks as if the p-value is very low, indicating that the data vary significantly from an even distribution, both between call types and between suspected type, but there is a warning that the results may be incorrect, probably because some expected values are very close to zero.
+
+```{r chisq_EDS_calls_suspected_expected}
+chisq.eds$expected
+```
+
+But when you look at the residuals of the test, it looks as if NP and M calls occur more often in the nonplastic category, and the P and P-NP calls occur more often with the plastic category - yay!
+
+```{r chisq_EDS_calls_suspected_residuals}
+chisq.eds$residuals
+```
+
+That was kind of fun, so I took a look at what effect the spectrum reader might have:
+
+```{r chisq_gl_2014_eds_calls_reader}
+## This is kind of fun, so I want to do the same thing with the person reading the spectra and the calls that are made
+
+eds.calls.by.reader <- 
+  table(
+    gl.2014.eds.calls[,c("reader","final_call")])
+
+eds.calls.by.reader
+
+chisq.eds.reader <- chisq.test(eds.calls.by.reader)
+
+chisq.eds.reader
+
+chisq.eds.reader$expected
+
+residuals(chisq.eds.reader)
+
+```
+
+It looks as if that pesky M-P call might be screwing with the chi-square's ability to compare distributions, so it might be worth taking out of the dataset completely (I had an internal battle as to whether it should be left in for future comparisons).
+
+```{r cross_tab_eds_calls}
+# eds.calls.by.suspect.sample.xtab <- 
+#   xtabs(
+#     ~gl.2014.eds.calls$barcode_range+gl.2014.eds.calls$final_call, 
+#     data = gl.2014.eds.calls$suspected,
+#     sparse = FALSE)
+
+eds.calls.by.suspect.sample <- 
+  as.data.frame(
+    table(
+      gl.2014.eds.calls[,c("final_call", "suspected", "trawl")]))
+
+eds.calls.by.suspect.sample$prop <- eds.calls.by.suspect.sample$Freq/10
+```
+
+```{r bar_plot_cross_tab_eds_calls_prop}
+
+ggplot(data = eds.calls.by.suspect.sample,
+       aes(x=trawl,
+           y=prop,
+           color=final_call,
+           fill=final_call)) +
+  geom_bar(stat = "identity") +
+  facet_grid(.~suspected) + 
+  theme(axis.text.x = element_text(size = 10,
+                                   angle = 45,
+                                   hjust = 1)) + 
+  theme(axis.title.x = element_blank()) +
+  theme(legend.title = element_blank()) +
+  ylab ("Proportion of pieces examined")
+
+```
+
+```{r plot_ggtern_gl_2014_eds_data, fig.height=6, fig.width=8}
+## I'm starting to play with this, but haven't really gotten far on how it can determine our "confidence" in the accuracy of our calls.
+
+## WARNING: This package required updated packages, which require restarting R - I got and error message when I tried to require ggtern and had to manually update the package Rcpp
+
+ggtern(
+  data=gl.2014.eds.calls, 
+  aes(
+    nonplastic_om, 
+    mineral, 
+    plastic, 
+    color=suspected,
+    )) +
+  geom_point() +
+  theme_nomask()+
+  geom_confidence_tern(aes(countour = TRUE))
+
+```
+

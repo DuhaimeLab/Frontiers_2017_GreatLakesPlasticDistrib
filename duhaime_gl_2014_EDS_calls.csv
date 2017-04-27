@@ -1,0 +1,204 @@
+barcode_range,barcode_short,trawl,data_file,suspected,final_call,mineral,nonplastic_om,plastic,notes,peaks_decreasing,image,h2o2,reader
+5067-5069,5067,NK 0009-3,5067.5069.1,not plastic,M,4,0,0,"Holes in rock material, may be coal fly ash","Si, O, Al, Na, C (Ga,K, Ge, and Fe, but might becasue of noise)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.2,not plastic,NP,0,3,1,"Lots of Carbon and oxygen maye due to NP-OM, Object seems spehrical with bumps of added unkown susbtances","C, Si, O, Al, N (Due to noise-Ge, Ga, and N)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.3,not plastic,M,4,0,0,"Holes in rock material, may be coal fly ash (Good example of coal ash)","Si, O, Al, Na, Ca, C, (Due to noise-N, Fe, Ga, Ge, and K)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.4,not plastic,NP,2,3,1,"Holes in substance, however the spectra shows a high amount of carbon, suggesting an organic substance","C, O, Si, Fe ( due to noise-Ga, Ge, and N)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.5,not plastic,M,4,0,0,"Holes in rock substance, most likely coal fly ash","Si, O Al, C, NA( due to noise-Ga, Ge, Fe, C)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.6,not plastic,NP,0,3,2,"Very defined struture, no smooth surfaces to suggest it is plastic","C ( due to noise- Na, C, Ge, Ga, si, Fe)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.7,not plastic,M,4,0,0,"Holes/pores in the struture, most likley a coal fly ash","Si, O, Al,Na, C (Due to noise-Ga, F, Ge, N)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.8,not plastic,M,3,1,1,"Structure is well defined and somewhat smooth, could be plastic, more mineral-like, since high amoutns of carbon and silicon","Si, O, C, ( Due to noise- Ga, Ge, N)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.9,not plastic,M,3,1,0,Structure has holes in the rock but does not have suffceint amoutns of silicon as compared to other coal fly ash examples,"C, Si, Al, (Due to noise-- N, Fe, Ga, Ge)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.10,not plastic,NP,2,3,0,"Structure seems to appear to be coal fly ash, but does not have suffcient amounts of Silicon","C, N, Si, Fe, ( Due to noise, Ga, and Ge)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.31,plastic,P,0,0,3,"Substance is spherical, but has rough edges.","C, O Si, (due to noise-Na, Ca, Fe)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.32,plastic,P,0,1,3,"Substance is spherical, but has rough edges.","C, O Fe, Si, P (Due to noise-Cr, Ca, Na)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.33,plastic,P,0,1,3,"Substance is shaped in odd ways, but is very defined and constant","C, O Si, (due to noise- Na, Fe, Ca)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.34,plastic,P,0,0,4,"Substance is spherically shaped, has pieces torn out of it","C, Si, O ( due to noise-Ca, Fe, Na)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.35,plastic,P,0,0,4,Substacns is spherically shaped,"C, O , Si, ( due to noise- Na, Ca, Fe)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.36,plastic,P,0,0,3,"Substance is Spherically shaped,appears to have fuzz on the sides","C, O , Si ( due to noise-Ca, Fe, Na)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.37,plastic,P,0,2,3,"Substacne has a unique shape, looks ot be a plastic fragment, but could also be a non-plasitc OM","C, O, Si, (due to noise-Fe, Ca, Na, P)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.38,plastic,P,0,1,3,Substance is not smooth but defined,"C, O ,SI, Al ( due to noise- Fe, Na, Ca, P)",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.39,plastic,M,4,0,1,Substance has an irregular shape and appears to be a mineral based on the highh amount of Fe,"Fe, C, Ca, Na, Si",yes,yes,andrew
+5067-5069,5067,NK 0009-3,5067.5069.40,plastic,P,0,1,3,Substance is flat and defined in some points,"C, O Si, Fe, (due to noise-Ca, Na)",yes,yes,andrew
+5027-5029,5027,NK 0005-4,5027.5029.1,not plastic,M,4,0,0,large Si compared to rest,"Si, O, C",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.2,not plastic,M,4,0,0,large Si compared to rest,"SI, O, C",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.3,not plastic,M,4,0,0,large Si compared to rest,"Si, O, C, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.4,not plastic,M,4,0,0,large Si compared to rest,"Si, O, C",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.5,not plastic,NP,0,3,1,"not smooth, flakey","C, O, Ti, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.6,not plastic,M,4,0,0,large Si compared to rest,"Si, O, C, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.7,not plastic,NP,0,3,1,"not smooth, large Si","Si, O, C, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.8,not plastic,M,4,0,0,large Si compared to rest,"Si, O, C, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.9,not plastic,M,4,0,1,"large Si, smooth surface with chunks out","Si, O, C, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.10,not plastic,M,4,0,0,"not smooth, large Si","Si, O, C, Fe, Ca",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.1,plastic,P,0,1,4,pretty smooth with some bumps and cracks,"C, O, Fe, P",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.2,plastic,P,0,1,4,"sort of smooth, very lumpy","C, O, Fe, F",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.3,plastic,P,0,1,2,"smooth with lots of stuff on top, no O","C, F",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.4,plastic,P,0,1,3,sort of smooth and flakey,"C, O, F",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.5,plastic,NP-P,0,2,2,"not smooth, flakey","C, O, F, Fe, Sn",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.6,plastic,NP-P,0,2,2,"not smooth, lumpy","C, F, O, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.7,plastic,NP-P,0,2,2,"not smooth, flakey","C, O, F, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.8,plastic,NA,NA,NA,NA,NA,duplicate of .1of2.7,NA,NA,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.9,plastic,P,0,1,2,smooth with stuff on top,"C, F, Fe",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.10,plastic,NP-P,0,2,2,"not smooth, lots of ridges, Al","C, O, F, Al",yes,yes,kaitie
+5027-5029,5027,NK 0005-4,5027.5029.1of2.11,plastic,NP-P,0,2,2,not smooth,"C, O, Fe, Sn",yes,yes,kaitie
+5030-5032,5030,NK 0006-1,5030.5032.1,not plastic,NP,0,3,1,"somewhat smooth, but with stuff clinging to it","C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.2,not plastic,NP,0,3,0,flakey looking with varied topography,"C, O, Fe, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.3,not plastic,NP,0,3,0,"pillowy surface, somewhat bubbly","C, O, Fe, P, Sn",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.4,not plastic,NP,0,3,0,"very irregular surface, flakey","C, O, Fe, Sn, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.5,not plastic,NP-P,0,2,2,looks like it could be plastic w/ debris on it,"C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.6,not plastic,NP,0,3,1,"somewhat smooth, w/ stuff on it","C, O, Fe, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.7,not plastic,M,4,0,0,"nearly perfectly spherical and smooth but big Si peak, no C","Si, O, Al, Fe, Na, C, Ti, Mg",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.8,not plastic,NP-P,0,2,2,smooth like plastic but contains Fe w/ O,"C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.9,not plastic,M,4,0,0,"big Si peak, little C","Si, O, C, P, Fe, W",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.10,not plastic,NP,0,3,1,"could be plastic, but has Fe and what looks like OM clinging to it","C, O, Fe, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.31,plastic,P,0,0,4,"obvious round shape, molten texture","C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.32,plastic,P,0,0,4,"glossy texture, flat topo","C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.33,plastic,P,0,0,4,"very glossy, clearly a polymer","C, O, Fe",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.34,plastic,NP-P,0,2,3,"varied topo, matrix of stuff attached","C, O, Fe, Na, Si",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.35,plastic,NP,1,3,1,"no image, difficult to make call","C, O, Fe, Ca",no,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.36,plastic,P,0,0,4,"glossy surface, flat w/ sharp edges","C, O, Fe, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.37,plastic,P,0,0,4,"glossy, sharp edges, big C peak","C, O, Fe, Ti, P",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.38,plastic,P,0,1,3,molten looking with glossy patches,"C, O, Fe, Na, Ti",yes,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.39,plastic,P,0,0,3,"no image. Big C peak, smaller O peak","C, O",no,yes,brendan
+5030-5032,5030,NK 0006-1,5030.5032.40,plastic,P,0,1,3,"due to shape and texture, looks like plastic","C, Fe, Ca, Na",yes,yes,brendan
+5148-5150,5148,NK 0014-3,5148.5150.1,plastic,NP,1,3,0,"Defined structure, could look like a rock however no metals","C, O, Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.2,plastic,P,0,1,4,Defined flat structure,"C, Ti, O, Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.3,plastic,P,1,1,2,Defined Struture could be plastic due to amoutns of carbon and oxygen,"C, O , Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.4,plastic,P,0,1,3,"High amounts of O, C, but the substance is not flat, more coupled and grouped","C, O , Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.5,plastic,M,4,0,0,"Coal fly ash, due to holes/pores in the substacne","Si, O, Br, K, C, Na, Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.6,plastic,NP-P,0,2,2,Coupled groups of either plastic or organic substances,"C, O , Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.7,plastic,P,0,1,3,Substance is well defined and appears to be a plastic,"C, O , Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.8,plastic,M,4,0,1,"Substance has lots of type of metals, however the struture doesnt seem to be metallic","F, Fe, C, O, Ti",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.9,plastic,P,0,2,4,molten looking and glassy,"C, O , Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.10,plastic,M,4,0,0,Substance apperas to be coal fly ash,"Si, O, Al, K, C, Na, Fe",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.31,not plastic,M,3,0,1,Substance has high amoutns of silicon and apperas to have a rocky formation,"Si, O Al, Na, C, K, Fe, Ca",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.32,not plastic,P,0,1,3,Substance looks well defined and brittle,"C,O, Si, Fe, Al ( Due to noise- Cl, Ca, P)",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.33,not plastic,P,0,2,3,Substance looks to be a conglomertate of different type of plastics,"C, O, F, TI, Br, Mg, (Due to noise- Ca, K)",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.34,not plastic,M,3,1,0,"Substance has high amount of Ti, and Si","C, O , Ti, Si, Fe, P, Al,Ca, Mg",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.35,not plastic,M,3,0,1,"Substance has high levels of Silicon, and seemed to look like a rock","C, Si, O (due to noise-Fe, Ca, Al)",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.36,not plastic,NP,1,3,0,"Substance has high levels of TI, and doesnt seem to resemble a plastic","C, O, Ti, F, Si, Al ( due to noise- Ca, Fe)",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.37,not plastic,M-P,2,0,2,"Substacne has high levels of Silicon, but is well defined similar to a plastic","Si, Al, O, Na, Ca, C, FE, K, Ti",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.38,not plastic,NP,1,3,0,"Substance has high levels of TI, and doesnt seem to resemble a plastic","Ti, C, P O , Si, Ca, Fe, Al, Cu",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.39,not plastic,P,0,0,3,Substance is well defined and has lots of carbon,"C,O,Fe, Ca, Na",yes,yes,"andrew, brendan"
+5148-5150,5148,NK 0014-3,5148.5150.40,not plastic,M,3,0,1,Substance has high levels of silicon and magnesium,"C, SI, Mg, O, Fe, Al, P, Ca",yes,yes,"andrew, brendan"
+5036-5038,5036,NK 0006-3,5036.5038.1,plastic,P,0,1,3,smooth and pillowy looking big C peak,"C, O, Fe, Si",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.2,plastic,P,0,0,4,"glossy and smooth, clearly plastic",C,yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.3,plastic,NP-P,0,2,3,fuzzy looking things attached,"C, O, Fe, P, Si, Sn",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.4,plastic,P,0,0,4,"clearly plastic, smooth w/ fractures","C, O",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.5,plastic,P,0,1,3,glossy and smooth,"C, O, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.6,plastic,P,0,0,4,"glossy, smooth, rigid edges","C, O, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.7,plastic,P,0,0,3,smooth with some kind of junk on it,"C, O, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.8,plastic,P,0,1,3,smooth parts with irregular shapes,"C, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.9,plastic,P,0,0,4,"molten and smooth, spherical shape","C, O, Fe, Si",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.10,plastic,P,0,1,3,huge C peak with smaller O,"C, O, Fe",no,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.31,not plastic,NP,0,3,1,"big C peak with tiny Fe one, looks spherical/smooth like coal fly ash but w/o Si, Al","C, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.32,not plastic,M,4,0,0,spherical and somewhat smooth; probably coal fly ash,"Al, Si, O, Fe, Ti",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.33,not plastic,NP,0,4,0,looks biological in nature,"C, O, N, Fe, Cl",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.34,not plastic,NP,0,3,1,veiny looking surface,"C, Fe, Si, Ti",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.35,not plastic,NP,0,3,1,based on shape I would say NP,"C, Fe, N, Si",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.36,not plastic,NP,1,3,0,texture looks organic NP,"C, O, Fe, Si, Ti, Sn",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.37,not plastic,NP,0,3,0,not smooth enough looking to be plastic,"C, N, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.38,not plastic,NP,0,2,1,lumpy but with strands of organic looking stuff,"C, N, Fe, Si",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.39,not plastic,NP,0,2,1,surface does not look like typical plastic,"C, Fe",yes,yes,brendan
+5036-5038,5036,NK 0006-3,5036.5038.40,not plastic,NP,0,3,0,looks biological in nature,"C, O, Fe, N, Si, Ge, Ga",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.1,not plastic,NP,1,3,0,"varied topo, kinda flakey","C, O, Fe, Si, K",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.2,not plastic,NP-P,0,2,2,"smooth, glossy w/ crevices","C, O, Fe",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.3,not plastic,NP-P,0,1,2,"smooth, with a scratch. could be plastic","C, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.4,not plastic,NP,0,3,1,"flakey and crumbly, rippled","C, O, Fe, Si, Al",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.5,not plastic,NP,0,3,0,"surface has almost knitted appearance, but overall unlike plastic","C, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.6,not plastic,NP,0,3,1,somewhat jagged apperance,"C, O, Fe, Si, Al",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.7,not plastic,NP,0,3,0,"multi-layered topography, crusty","C, Fe, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.8,not plastic,NP,0,3,0,"layered looking, flakey","C, O, Fe",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.9,not plastic,P,0,0,4,"smooth, and clean fracture in frag","C, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.10,not plastic,NP-P,0,2,1,plaques on lumpy surface,"C, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.31,plastic,P,0,0,4,uniform flat surface with clear cracks,"C, O, Ti, Si, Fe",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.32,plastic,M,4,0,0,"surface somewhat pitted, big Si peak","Si, O, C",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.33,plastic,P,0,1,3,typical crumbly plastic look to it,"C, O, Fe, F, P, Si, Al",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.34,plastic,P,0,0,4,smooth and gently waving surface,"C, O",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.35,plastic,M,3,1,0,big Si peak,"O, C, Si, Fe, Al, K, P",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.36,plastic,P,0,0,4,big carbon and has wavy/smooth look,"C, O, Fe, P, Si",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.37,plastic,M,3,1,1,crackly surface with big Si peak more than C,"O, Si, C, Fe",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.38,plastic,P,0,1,3,somewhat smooth with light topograpy,"C, O, Fe, Si, P",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.39,plastic,P,0,1,3,bubbly surface like magma,"C, O, Fe, Si",yes,yes,brendan
+5053-5055,5053,NK 0008-3,5053.5055.40,plastic,P,0,0,4,"Mostly C, pillowy","C, O, Fe, Si",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.1,plastic,P,0,0,4,smoothish looking surface,"C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.2,plastic,P,0,0,4,smooth but edges sharp/jagged,"C, O, Si",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.3,plastic,P,0,1,3,lumpy/magma texture,"C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.4,plastic,NP-P,0,2,2,"larger Fe peak, poor image quality makes call difficult","C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.5,plastic,P,0,1,3,pillowy magma texture,"C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.6,plastic,P,0,0,3,smooth and wavy shaped,"C, O, Fe, Si",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.7,plastic,P,1,1,3,smooth surface with some ridges,"C, O, Fe, Si, P, Al",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.8,plastic,P,0,0,4,pillowy lumpy with big C smaller O,"C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.9,plastic,P,0,0,4,flat with some ridges,"C, O",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.10,plastic,P,0,0,4,"spherical but ""soft"" looking unlike coal fly ash","C, O, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.31,not plastic,NP,0,3,1,"spongy looking, porous","C, O, Fe, Si",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.32,not plastic,NP,0,3,1,layered look and scaly,"C, O, Ta, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.33,not plastic,NP,2,2,0,rounded like sediment often is,"C, Fe, O, Si",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.34,not plastic,NP,0,3,0,"irregular shape, stringy","C, Fe, O, Si, K, P",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.35,not plastic,NA,NA,NA,NA,duplicate of .34,NA,NA,NA,brendan
+5061-5066,5061,NK 0009-2,5061.5066.36,not plastic,M,4,0,0,smooth but rounded looking/dull,"Si, O, C, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.37,not plastic,NP,0,3,0,flaky looking and dull,"C, O, Fe, Si, P, K",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.38,not plastic,NP-P,0,2,2,"flat looking like plastic, but hard to say","C, O, Fe, Si, P, K",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.39,not plastic,M,4,0,0,glassy looking with indentations,"Si, O, C, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.40,not plastic,NP,0,4,0,"flaky, varied topography","C, O, Si, Fe",yes,yes,brendan
+5061-5066,5061,NK 0009-2,5061.5066.41,not plastic,M,4,0,0,"honeycomb texture, fractured","C, Si, O, K, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.1,not plastic,NP,0,3,0,"flaky surface, textured","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.2,not plastic,M,4,0,0,"spherical, pitted","O, C, Al, Si, Fe, P",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.3,not plastic,M,4,0,0,"spherical, pitted","O, C, Al, Si, Fe, K, Mg",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.4,not plastic,M,4,0,0,"rounded, glassy w/ pits","O, Si, C, Al, K, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.5,not plastic,M,4,0,0,"lightly textured, little topography","O, C, Al, Si, Fe, Ti, K",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.6,not plastic,NP-P,0,2,2,"varied topo, raised matrix","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.7,not plastic,M,4,0,0,"spherical, pitted","O, Si, C, Al, Fe, K, Mg",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.8,not plastic,NP,0,3,0,"flakysurface, rounded","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.9,not plastic,M,4,0,0,smooth w/ ridges,"O, C, Al, Si, Fe, Ti, K",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.10,not plastic,NP-P,0,3,1,"flaky surface, but rounded","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.31,plastic,P,0,0,4,"magma texture, and smooth in some parts","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.32,plastic,M,4,0,0,"glassy, mostly flat","O, C, Si, Al, Fe, K, Ti",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.33,plastic,P,0,0,4,"smooth, some flaky areas","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.34,plastic,P,0,0,4,"smooth, fractures forming","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.35,plastic,P,0,0,4,molten w/ raised spots,C,yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.36,plastic,P,0,0,4,scaly/glassy with pores,"C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.37,plastic,P,0,0,4,"glassy, striations","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.38,plastic,M,0,0,4,"smooth, glassy with some round protrusions","O, Al, C, Si, Fe, Ca",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.39,plastic,P,0,0,4,"varied texture, some pits, shelfs","C, O, Fe",yes,yes,brendan
+5161-5163,5161,NK 0016-1,5161.5163.40,plastic,P,0,0,4,"flat, somewhat textured","C, O",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.1,plastic,P,0,0,4,magma-like surface with some crevices,"C, O, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.2,plastic,P,0,0,4,"very smooth, several depressions","C, O, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.3,plastic,P,0,0,4,lumpy surface,"C, O",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.4,plastic,P,0,0,4,"varied topo, with pillows",C,yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.5,plastic,P,0,1,3,"striated with defined edges, PVC?","C, Cl, O",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.6,plastic,M,4,0,0,honeycomb features,"O, Si, C, Al, K, Fe, Na",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.7,plastic,P,0,0,4,smooth with some flakes,"C, O, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.8,plastic,P,0,0,4,layered matrix look to it,"C, O, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.9,plastic,NP-P,0,2,3,"smooth in spots, but pitted in others","C, O, Ti, Si, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.10,plastic,P,0,0,4,pillowy with varied topo,"C, O, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.31,not plastic,NP,0,3,0,"powdery surface, deep crevices","C, O, Si, Mg, Fe",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.32,not plastic,P,1,1,2,smooth and flat faced,"C, O, Si",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.33,not plastic,NP,0,3,1,"rounded shape, smoothish","C, O",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.34,not plastic,M,4,0,0,"sharp faces, smoothish","O, C, Fe, Si, Al, Ca",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.35,not plastic,NP,0,3,0,brain-like texture,"C, O, Fe, P, Ca",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.36,not plastic,M,4,0,0,"smooth in parts, layered in others","O, Si, Ca, Fe, W, P, Al",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.37,not plastic,P,0,1,3,"lumpy texture, w/ some cracks","C, O, Fe, Si, Al",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.38,not plastic,M,3,1,0,smooth disc looking thing,"C, O, Si, Ti",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.39,not plastic,NP-P,0,2,3,"pitted texture, jagged edges","C, O, Fe, Cl",yes,yes,brendan
+5286-5287,5286,NK 0024-3,5286.8287.40,not plastic,NP-P,0,2,2,"lumpy and pitted texture, smoother in parts","C, O, Fe, Si, Al",yes,yes,brendan
+5024-5026,5024,NK 0005-3,5024.5026.1,not plastic,M,4,0,0,huge Si relative to rest,"Si, O, N, C",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.2,not plastic,NP,0,3,1,P was also seen in OM standard 2 and 3,"C, O, Ti, Si, P, Fe, Al, Ca",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.3,not plastic,NP,0,3,2,"surface looks like plastic, flaky and smooth","C, O, Fe, Cu",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.4,not plastic,NP,0,3,2,"surface looks like plastic, Si looks like beads","C, O, Si, Fe",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.5,not plastic,NP,0,3,2,"smooth like plastic, but Al notable towards non-plastic","C, Si, Al, O, Cu",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.6,not plastic,M,4,0,0,looks like a chunk of rock,"Si, Al, O, C, Fe, Ti, Ca",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.7,not plastic,NP,0,3,1,"looks chunky, high topography","C, F, O, Ca, Fe, P, Cu",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.8,not plastic,NP-P,0,3,3,"round, chunky, kind of bubbly","C, O, Si, Cu",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.9,not plastic,NP,0,3,1,not smooth,"C, F, O, Fe",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.10,not plastic,P,0,2,3,"smooth, fractured, step-like","C, O, Si",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.31,plastic,P,0,1,4,"round, smooth, cracked down the middle","C, Fe",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.32,plastic,NP-P,0,2,2,"flakes, weird rough quinoa surface matrix","C, O, Na, Fe",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.33,plastic,P,0,0,4,"wavey, smooth and rough","C, O",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.34,plastic,P,0,0,4,"very smooth, straight fractures","C, O",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.35,plastic,P,0,1,4,"lumpy smooth, attached particles (cells?)","C, O, Si",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.36,plastic,P,0,0,4,"smoooooooth, some fractured flakes",C,yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.37,NA,NA,NA,NA,NA,duplicate of .35,NA,NA,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.38,plastic,P,0,0,4,"bubbly, smooth, molten","C, O",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.39,plastic,P,0,2,3,possible elemental signal from biofilm,"C, Na, Fe, O",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.40,plastic,NP-P,0,2,2,smooth with crusty film,"C, O, Fe, Sn",yes,yes,"rachel, brendan, melissa"
+5024-5026,5024,NK 0005-3,5024.5026.41,plastic,P,0,1,3,"very smooth, a little flaky","C, O, Fe",yes,yes,"rachel, brendan, melissa"
