@@ -1476,6 +1476,41 @@ lm_trawl_tot_mnr <-
 summary(lm_trawl_tot_mnr)
 ```
 
+```{r table_gl_2014_abs_value_weather_stn_summary_data_spear_corr}
+
+gl.2014.trawl.conc.sum.data.numeric.only<- 
+  gl.2014.trawl.conc.sum.data[sapply(gl.2014.trawl.conc.sum.data, 
+                                     is.numeric)]
+corrtab.gl.2014.trawl.conc.sum.data <-
+  rcorr(as.matrix(abs(gl.2014.trawl.conc.sum.data.numeric.only)), type = 'spearman')
+
+corrtab.mnr.gl.2014.trawl.conc.sum.data <- 
+  as.data.frame(
+    cbind(rho = corrtab.gl.2014.trawl.conc.sum.data$r[,32], 
+          p_value = corrtab.gl.2014.trawl.conc.sum.data$P[,32]))
+
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+
+flat.corrtab.gl.2014.trawl.conc.sum.data <-
+  as.data.frame(
+    flattenCorrMatrix(corrtab.gl.2014.trawl.conc.sum.data$r,
+                    corrtab.gl.2014.trawl.conc.sum.data$P))
+
+datatable(corrtab.mnr.gl.2014.trawl.conc.sum.data,
+          options = list(pageLength = 10),
+          caption = "Spearman's correlation of MNR vs. absolute value of metadata")
+
+
+```
+
 ```{r plot_gl_2014_mnr_by_trawl_totals_all_size_stn_class, fig.height=8, fig.width=12}
 
 ggplot(gl.2014.trawl.conc.sum.data[!is.na(gl.2014.trawl.conc.sum.data$MNR),], 
