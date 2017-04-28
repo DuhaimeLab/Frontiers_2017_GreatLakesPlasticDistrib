@@ -33,12 +33,8 @@ knitr::opts_chunk$set(eval = TRUE,
                       dependson = NULL,
                       engine = "R", # Chunks will always have R code, unless noted
                       error = TRUE,
-                      dev = "pdf",
                       fig.path="outfiles_final/final_",  # Set the figure options
                       fig.align = "center"
-                      #, 
-                      # fig.width = 6,
-                      # fig.height = 6
                       )
 ```
 
@@ -73,36 +69,36 @@ require(Hmisc)
 # Maps and other figures generated outside of R 
 
 ## Stations sampled in 2014
-```{r station.map, out.height = "200px"}
-include_graphics("Duhaime_Fig1_stations.tiff", auto_pdf = TRUE)
+```{r station.map}
+knitr::include_graphics("Duhaime_Fig1.png")
 ```
 
 ## Sample processing
-```{r station.processing, out.height = "200px"}
-include_graphics("Duhaime_Fig2_sample_images.tif", auto_pdf = TRUE)
+```{r station.processing}
+knitr::include_graphics("Duhaime_Fig2_sample_images.png")
 ```
 
 ## Sample concentrations
-```{r sample.concentration.map, out.height = "200px"}
-include_graphics("Duhaime_Fig3_count_maps_total.tif", auto_pdf = TRUE)
+```{r sample.concentration.map}
+knitr::include_graphics("Duhaime_Fig3_count_maps_total.png")
 ```
 
 ## SEM-EDS example images
-```{r sem.images, out.height = "200px"}
-include_graphics("246530_Duhaime_Figure_7.TIF", auto_pdf = TRUE)
+```{r sem.images}
+knitr::include_graphics("Duhaime_Fig7_EDS_spectra.png")
 ```
 
 ## Transport model outputs
-```{r model.by.month, out.height = "200px"}
-include_graphics("Duhaime_Fig9_model_months.tif", auto_pdf = TRUE)
+```{r model.by.month}
+knitr::include_graphics("Duhaime_Fig9_model_months.png")
 ```
 
 ```{r model.res.time, out.height = "200px"}
-include_graphics("Duhaime_Fig10_residence_time_model.tif", auto_pdf = TRUE)
+knitr::include_graphics("Duhaime_Fig10_residence_time_model.png")
 ```
 
 ```{r model.aggregation, out.height = "200px"}
-include_graphics("Duhaime_SI_Fig4.tif", auto_pdf = TRUE)
+knitr::include_graphics("Duhaime_SI_Fig4.png")
 ```
 
 
