@@ -193,6 +193,11 @@ gl.2014.all.data <-
         all.x = TRUE, 
         suffixes = c(".x", ".y"))
 
+write.csv(gl.2014.all.data, 
+          file = "./outfiles_final/final_data_sheet_1_all_data_merged.csv", 
+          na = "NA",
+          row.names = FALSE)
+
 ```
 
 ```{r create_gl_2014_conc_w_nonnumeric_metadata}
@@ -363,7 +368,7 @@ datatable(gl.2014.plastics.tot.wide.all.data,
           caption = "Total of all fractions for complete trawls (km-2)")
 
 write.csv(gl.2014.plastics.tot.wide.all.data, 
-          file = "./outfiles_final/final_data_sheet_1_total_concentration_all_sizes_all_data.csv", 
+          file = "./outfiles_final/final_total_concentration_all_sizes_all_data.csv", 
           na = "NA",
           row.names = FALSE)
 ```
