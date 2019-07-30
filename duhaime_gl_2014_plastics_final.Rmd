@@ -1,7 +1,7 @@
 ---
 title: "Great Lakes Plastics 2014 Data"
 author: "Rachel N. Cable & Melissa B. Duhaime"
-date: "April 25, 2017"
+date: "July 30, 2019"
 output:  
   html_document:
     code_folding: hide
@@ -13,17 +13,19 @@ output:
       collapsed: no
       smooth_scroll: yes
       toc_depth: 3
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!--BEGIN:  Set the global options and load packages-->
 
-```{r create_output_directory, echo = FALSE}
+```{r create_output_directory, echo = FALSE, warning=FALSE}
 output_dir <- "./outfiles_final/"
 dir.create(path = output_dir, showWarnings = TRUE)
 ```
 
 
-```{r set-global-options, echo = FALSE}
+```{r set-global-options, echo = FALSE, message=FALSE}
 require(knitr)
 knitr::opts_chunk$set(eval = TRUE, 
                       echo = TRUE, 
@@ -39,32 +41,33 @@ knitr::opts_chunk$set(eval = TRUE,
 ```
 
 ```{r silent-packages, echo = FALSE, eval = TRUE, message=FALSE, include = FALSE}
-require(plyr)
-require(dplyr)
-require(ggplot2)
-require(DT)
-require(plotly)
-require(readr)
-require(splines)
-require(tidyr)
-require(reshape2)
-require(corrgram)
-require(sciplot)
-require(stats)
-require(tables)
-require(vegan)
-require(car)
-require(xtable)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(DT)
+library(plotly)
+library(readr)
+library(splines)
+library(tidyr)
+library(reshape2)
+library(corrgram)
+library(sciplot)
+library(stats)
+library(tables)
+library(vegan)
+library(car)
+library(xtable)
   options(xtable.floating = FALSE)
   options(xtable.timestamp = "")
-require(ggtern)
-require(timeDate)
-require(MASS)
-require(Hmisc)
+library(ggtern)
+library(timeDate)
+library(MASS)
+library(Hmisc)
 ```
 
 <!--END:  Set the global options and load packages-->
 
+***This is an updated version from the original 2017 publication. Additional trawl metadata, such as the coordinates of each trawl, have been added and incorporated into the relevant data tables.***
 
 # Maps and other figures generated outside of R 
 
@@ -105,18 +108,22 @@ knitr::include_graphics("Duhaime_SI_Fig4.png")
 # Plastic concentrations
 
 ## Importing and Managing Count Data and Trawl Metadata
+
 ```{r import_gl_2014_plastic_concentrations}
 
 ## Read in csv
 ## total_conc_km2 column is summation of counts from all non-fiber plastic types: does not include fibers
 
 gl.2014.plastics.conc.df <- 
-  read.csv(file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_plastic_concentrations.csv")
+  read.csv(file = "/Users/cabler/Box Sync/RNC_Duhaime_Lab/R_projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_plastic_concentrations.csv")
 
 # Set factor levels for size fractions
 
 gl.2014.plastics.conc.df$size_fraction_um <-
-  factor(gl.2014.plastics.conc.df$size_fraction_um, levels = c('106-1000', '1000-4750', '>4750'))
+  factor(gl.2014.plastics.conc.df$size_fraction_um
+         , levels = c('106-1000'
+                      , '1000-4750'
+                      , '>4750'))
 
 ```
 
@@ -168,18 +175,30 @@ table.gl.2014.conc.by.size.comp.melt <-
 
 ```{r table_gl_2014_metadata}
 
-gl.2014.weather.data <- read.csv("~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_trawl_metadata.csv")
+gl.2014.trawl.data <- read.csv("/Users/cabler/Box Sync/RNC_Duhaime_Lab/R_projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_trawl_metadata.csv"
+                               , na.strings = "NA")
 
 ## Rearrange factor levels for station type and water body
 
-gl.2014.weather.data$water_body <- factor(gl.2014.weather.data$water_body, levels = c("Lake Superior", "Lake Huron", "Lake St. Clair", "Detroit Rv.", "Lake Erie", "Niagara Rv."))
+gl.2014.trawl.data$water_body <- factor(gl.2014.trawl.data$water_body
+                                        , levels = c("Lake Superior"
+                                                     , "Lake Huron"
+                                                     , "Lake St. Clair"
+                                                     , "Detroit Rv."
+                                                     , "Lake Erie"
+                                                     , "Niagara Rv."))
 
-gl.2014.weather.data$station_class <- factor(gl.2014.weather.data$station_class, levels = c("Basin", "Non urban", "Urban", "River plume", "WWTP"))
+gl.2014.trawl.data$station_class <- factor(gl.2014.trawl.data$station_class
+                                           , levels = c("Basin"
+                                                        , "Non urban"
+                                                        , "Urban"
+                                                        , "River plume"
+                                                        , "WWTP"))
 
-datatable(gl.2014.weather.data, options = list(
+datatable(gl.2014.trawl.data, options = list(
   pageLength = 10,
   autoWidth = TRUE),
-  caption = "Station metadata"
+  caption = "Trawl metadata"
 )
 
 ```
@@ -188,10 +207,13 @@ datatable(gl.2014.weather.data, options = list(
 ## Merge trawl datasets for correlations and plotting
 
 gl.2014.all.data <- 
-  merge(gl.2014.plastics.conc.df, gl.2014.weather.data, 
-        by = c("trawl","station"), 
-        all.x = TRUE, 
-        suffixes = c(".x", ".y"))
+  merge(gl.2014.plastics.conc.df
+        , gl.2014.trawl.data
+        , by = c("trawl"
+                 ,"station")
+        , all.x = TRUE
+        , suffixes = c(".x"
+                       , ".y"))
 
 write.csv(gl.2014.all.data, 
           file = "./outfiles_final/final_data_sheet_1_all_data_merged.csv", 
@@ -205,9 +227,9 @@ write.csv(gl.2014.all.data,
 ## Create dataframe of only nonnumeric trawl metadata
 
 gl.2014.trawl.data.nonnumeric<- 
-  gl.2014.weather.data[
+  gl.2014.trawl.data[
     sapply(
-      gl.2014.weather.data, 
+      gl.2014.trawl.data, 
       function(x) !is.numeric(x))]
 
 # Merge with per-trawl concentration data
@@ -244,7 +266,8 @@ gl.all.trawl.data.nonnumeric.long <-
                    'station', 
                    'size_fraction_um', 
                    'trawl_date', 
-                   'trawl_start_time', 
+                   'time_start', 
+                   'time_end',
                    'water_body',
                    'location', 
                    'station_class'), 
@@ -332,36 +355,41 @@ gl.2014.plastics.tot.wide.complete.only$total_concentration <-
 
 gl.2014.plastics.tot.wide.all.data <-
   merge(gl.2014.plastics.tot.wide.complete.only, 
-        gl.2014.weather.data, 
+        gl.2014.trawl.data, 
         by = c("trawl","station"), 
         all.x = TRUE, 
         suffixes = c(".x", ".y"))
 
+gl.2014.plastics.tot.wide.all.data.colnames <- c(colnames(gl.2014.plastics.tot.wide.all.data))
+
 gl.2014.plastics.tot.wide.all.data <-
-gl.2014.plastics.tot.wide.all.data[,c("trawl", 
-  "station",
-  "water_body",
-  "location",
-  "station_class",
-  "106-1000",
-  "1000-4750",
-  ">4750",
-  "total_concentration",
-  "trawl_date",
-  "trawl_start_time",
-  "flowm_dist_m",
-  "flowm_area_km2",
-  "wet_mass",
-  "dry_mass",
-  "air_vel_avg_kt",
-  "cloud_cover_avg",
-  "air_temp_avg_C",
-  "water_temp_avg_C",
-  "E_wtr_vel_surf_avg_kt",
-  "N_wtr_vel_surf_avg_kt",
-  "wv_drctn_avg",
-  "wv_prd_avg",
-  "sig_wv_ht_avg_m")]
+gl.2014.plastics.tot.wide.all.data[ , gl.2014.plastics.tot.wide.all.data.colnames]
+
+# gl.2014.plastics.tot.wide.all.data <-
+# gl.2014.plastics.tot.wide.all.data[,c("trawl", 
+#   "station",
+#   "water_body",
+#   "location",
+#   "station_class",
+#   "106-1000",
+#   "1000-4750",
+#   ">4750",
+#   "total_concentration",
+#   "trawl_date",
+#   "trawl_start_time",
+#   "flowm_dist_m",
+#   "flowm_area_km2",
+#   "wet_mass",
+#   "dry_mass",
+#   "air_vel_avg_kt",
+#   "cloud_cover_avg",
+#   "air_temp_avg_C",
+#   "water_temp_avg_C",
+#   "E_wtr_vel_surf_avg_kt",
+#   "N_wtr_vel_surf_avg_kt",
+#   "wv_drctn_avg",
+#   "wv_prd_avg",
+#   "sig_wv_ht_avg_m")]
 
 datatable(gl.2014.plastics.tot.wide.all.data,
           options = list(pageLength = 25),
@@ -2212,14 +2240,14 @@ datatable(stn.mean.sd.conc.class,
 ```{r table_gl_2014_blank_counts, results = "asis", echo=FALSE}
 
 blank.counts <- read.csv(
-  file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_blank_counts_all.csv")
+  file = "/Users/cabler/Box Sync/RNC_Duhaime_Lab/R_projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_blank_counts_all.csv")
 
 blank.counts[, colSums(blank.counts != 0) > 0] 
 
 blank.counts.data <- 
   write.csv(
     blank.counts, 
-    file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/outfiles_final/final_blank_counts_table.csv", 
+    file = "./outfiles_final/final_blank_counts_table.csv", 
     na = "NA")
 
 datatable(blank.counts, 
@@ -2235,7 +2263,7 @@ datatable(blank.counts,
 ## Import into dataframe
 gl.2014.eds.calls <- 
   read.csv(
-    file = "~/Box Sync/Duhaime Lab/R projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_EDS_calls.csv")
+    file = "/Users/cabler/Box Sync/RNC_Duhaime_Lab/R_projects/gl_2014_count_data_github/final_directory/duhaime_gl_2014_EDS_calls.csv")
 
 ## Take out rows with no data (all spectra repeats)
 gl.2014.eds.calls <- 
